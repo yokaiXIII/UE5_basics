@@ -80,11 +80,12 @@ void ATP_Character::BeginPlay() {
 	
 	MaxSpeedWalkingOrig = GetCharacterMovement()->MaxWalkSpeed;
 	if (MovementCurve && OffsetCurve) {
-		FOnTimelineFloat ProgressFunctionLength;
-		ProgressFunctionLength.BindUFunction(this, "HandleProgressArmLength");
-		AimTimeline.AddInterpFloat(MovementCurve, ProgressFunctionLength);
+		// Distanza dal Player
+		FOnTimelineFloat ProgressFunctionLength; // funzione di timeline di tipo float
+		ProgressFunctionLength.BindUFunction(this, "HandleProgressArmLength"); // buinding della funzione
+		AimTimeline.AddInterpFloat(MovementCurve, ProgressFunctionLength); // legare la funzione di timeline alla timeline
 
-		FOnTimelineVector ProgressFunctionOffset;
+		FOnTimelineVector ProgressFunctionOffset; // timeline di tipo vector
 		ProgressFunctionOffset.BindUFunction(this, "HandleProgressCameraOffset");
 		AimTimeline.AddInterpVector(OffsetCurve, ProgressFunctionOffset);
 
