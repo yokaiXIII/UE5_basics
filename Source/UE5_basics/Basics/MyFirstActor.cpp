@@ -3,12 +3,16 @@
 
 #include "MyFirstActor.h"
 
+#include <string>
+
 // Sets default values
 AMyFirstActor::AMyFirstActor()
 {
  	PrimaryActorTick.bCanEverTick = true; // can tick?
-	PrimaryActorTick.TickInterval = 0.2f; // what is the interval tick?
+	PrimaryActorTick.TickInterval = 0.5f; // what is the interval tick?
 
+	
+	// Di default di actor
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
 	BoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComponent"));
 	/*	
@@ -17,6 +21,8 @@ AMyFirstActor::AMyFirstActor()
 	BoxComponent->SetBoxExtent(FVector(200.f, 200.f, 100.f));
 	BoxComponent->SetCanEverAffectNavigation(false);
 	*/
+
+	// Rende figlio con SetupAttachment
 	BoxComponent->SetupAttachment(RootComponent);
 }
 
@@ -24,11 +30,12 @@ AMyFirstActor::AMyFirstActor()
 void AMyFirstActor::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	OnActorBeginOverlap.AddDynamic(this, &AMyFirstActor::OnBeginOverlap);
-	OnActorEndOverlap.AddDynamic(this, &AMyFirstActor::OnEndOverlap);
 
 	// Bind example
+	// Delegate
+	OnActorBeginOverlap.AddDynamic(this, &AMyFirstActor::OnBeginOverlap);
+	OnActorEndOverlap.AddDynamic(this, &AMyFirstActor::OnEndOverlap);
+	
 	/*
 	ACharacter* PlayerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	AFP_FirstPersonCharacter * FPCharacter = dynamic_cast<AFP_FirstPersonCharacter*>(PlayerCharacter);
@@ -45,6 +52,8 @@ void AMyFirstActor::OnBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
 	{
 		return;
 	}
+
+	// EnteredCharacters.Add(OtherActor);
 
 	UClass* OtherActorClass = OtherActor->GetClass();
 	for(auto& SensedClass : SensedCharacterClasses)
@@ -78,6 +87,7 @@ void AMyFirstActor::OnEndOverlap(AActor* OverlappedActor, AActor* OtherActor)
 		return;
 	}
 
+	// EnteredCharacters.Remove(OtherActor);
 	UClass* OtherActorClass = OtherActor->GetClass();
 	for(auto& SensedClass : SensedCharacterClasses)
 	{
@@ -110,7 +120,21 @@ void AMyFirstActor::BindTest()
 void AMyFirstActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	
+	BoxComponent->GetOverlappingActors(EnteredCharacters, AActor::StaticClass());
 
 	//GEngine->AddOnScreenDebugMessage(896745, 2.f, FColor::Green, FString::Printf(TEXT("world time: %f"), GetWorld()->TimeSeconds));
 	//GEngine->AddOnScreenDebugMessage(8967444, 2.f, FColor::Blue, "world time: "+FString::SanitizeFloat(GetWorld()->TimeSeconds));
+}
+
+void AMyFirstActor::PrintEnteredCharacters()
+{
+	if (!GEngine) return;
+	
+	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, FString(TEXT("Characters in list: ")) + FString::FromInt(EnteredCharacters.Num()));
+	for (int32 i = 0; i < EnteredCharacters.Num(); i++)
+	{
+		if (!IsValid(EnteredCharacters[i])) continue;
+		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Purple, EnteredCharacters[i]->GetName());
+	}
 }
