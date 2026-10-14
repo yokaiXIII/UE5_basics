@@ -73,3 +73,13 @@ Plugins/*/Intermediate/*
 # Cache files for the editor to use
 DerivedDataCache/*
 Content/StarterContent/*
+
+# Others
+/.git
+/.idea
+/.vscode
+/Content
+/DerivedDataCache
+/Intermediate
+/Saved
+/Visual Studio 18
