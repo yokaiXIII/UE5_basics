@@ -111,6 +111,11 @@ void AMyFirstActor::OnEndOverlap(AActor* OverlappedActor, AActor* OtherActor)
 	*/
 }
 
+void AMyFirstActor::ActivateEffect()
+{
+	BoxComponent->GetOverlappingActors(EnteredCharacters, AActor::StaticClass());
+}
+
 void AMyFirstActor::BindTest()
 {
 	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Purple, "Player has shoot!");
@@ -121,7 +126,7 @@ void AMyFirstActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
-	BoxComponent->GetOverlappingActors(EnteredCharacters, AActor::StaticClass());
+	ActivateEffect();
 
 	//GEngine->AddOnScreenDebugMessage(896745, 2.f, FColor::Green, FString::Printf(TEXT("world time: %f"), GetWorld()->TimeSeconds));
 	//GEngine->AddOnScreenDebugMessage(8967444, 2.f, FColor::Blue, "world time: "+FString::SanitizeFloat(GetWorld()->TimeSeconds));

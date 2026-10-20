@@ -33,6 +33,9 @@ protected:
 	UFUNCTION()
 	void OnEndOverlap(AActor* OverlappedActor, AActor* OtherActor);
 
+	UFUNCTION()
+	virtual void ActivateEffect();
+
 public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings", meta=(DisplayName="Sensed Characters"))
