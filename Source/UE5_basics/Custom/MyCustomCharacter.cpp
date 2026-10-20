@@ -110,8 +110,6 @@ void AMyCustomCharacter::Move(const FInputActionValue& Value)
 
 	// route the input
 	DoMove(MovementVector.X, MovementVector.Y);
-
-	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, "MOVE!!!");
 }
 
 void AMyCustomCharacter::Look(const FInputActionValue& Value)
