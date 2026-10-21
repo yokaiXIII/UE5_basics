@@ -9,7 +9,7 @@
 AMyFirstActor::AMyFirstActor()
 {
  	PrimaryActorTick.bCanEverTick = true; // can tick?
-	PrimaryActorTick.TickInterval = 0.5f; // what is the interval tick?
+	PrimaryActorTick.TickInterval = 0.2f; // what is the interval tick?
 
 	
 	// Di default di actor
