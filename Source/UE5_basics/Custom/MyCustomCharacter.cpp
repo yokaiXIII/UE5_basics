@@ -6,6 +6,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
 #include "Components/CapsuleComponent.h"
+#include "Custom/FPS_Target.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 
@@ -72,6 +73,10 @@ void AMyCustomCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	AimTimeline.TickTimeline(DeltaTime);
+	if (IsShooting)
+		FireWeapon();
+	else
+		Hit.Init();
 }
 
 /// Input function to override
@@ -98,6 +103,9 @@ void AMyCustomCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMyCustomCharacter::Look);
 
+		// Shoot
+		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Triggered, this, &AMyCustomCharacter::Shoot);
+		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Completed, this, &AMyCustomCharacter::StopShoot);
 
 		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Purple, "Binded Actions");
 	}
@@ -163,6 +171,11 @@ void AMyCustomCharacter::DoJumpEnd()
 	StopJumping();
 }
 
+void AMyCustomCharacter::Shoot()
+{
+	IsShooting = true;
+}
+
 void AMyCustomCharacter::AimIn()
 {
 	GetCharacterMovement()->bOrientRotationToMovement = true;
@@ -175,6 +188,24 @@ void AMyCustomCharacter::AimOut()
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 	AimTimeline.Reverse();
 	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, "Aim OUT");
+}
+
+void AMyCustomCharacter::FireWeapon()
+{
+	BulletTrace();
+	GEngine->AddOnScreenDebugMessage(-1, .5f, FColor::Red, "Firing");
+	auto ActorHit = Hit.GetActor();
+	if (!IsValid(ActorHit)) return;
+
+	auto Target = Cast<AFPS_Target>(ActorHit);
+	if (!IsValid(Target)) return;
+	GEngine->AddOnScreenDebugMessage(-1, .5f, FColor::Yellow, "Target Found");
+	Target->Hit(this);
+}
+
+void AMyCustomCharacter::StopShoot()
+{
+	IsShooting = false;
 }
 
 void AMyCustomCharacter::HandleProgressArmLength(float Length)
@@ -205,4 +236,18 @@ void AMyCustomCharacter::NotifyControllerChanged()
 			GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Green, "IMC aggiunto");
 		}
 	}
+}
+
+void AMyCustomCharacter::BulletTrace()
+{
+	auto World = GetWorld();
+	if (!IsValid(World)) return;
+	
+	auto startLocation = FollowCamera->GetComponentLocation();
+	auto endLocation = startLocation + FollowCamera->GetForwardVector() * MaxRange;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(UGameplayStatics::GetPlayerPawn(World, 0));
+
+	World->LineTraceSingleByChannel(Hit, startLocation, endLocation, ECC_Pawn, Params);
+	DrawDebugLine(World, startLocation, endLocation, FColor::Red, false, 0.5, 0, 2);
 }

@@ -9,6 +9,7 @@
 #include "Components/TimelineComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "MyCustomCharacter.generated.h"
 
 class UInputMappingContext;
@@ -43,6 +44,15 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UCustomHealthComponent* HealthComponent;
 
+	// Shooting variables
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	int MaxRange = 1000;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	FHitResult Hit;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	bool IsShooting = false;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -75,6 +85,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category="Input")
 	UInputAction* AimAction;
 
+	UPROPERTY(EditAnywhere, Category="Input")
+	UInputAction* ShootAction;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Input")
 	TObjectPtr<UInputMappingContext> DefaultMappingContext;
 
@@ -86,7 +99,9 @@ public:
 
 	void AimIn();
 	void AimOut();
-	
+	void FireWeapon();
+
+	void StopShoot();
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
@@ -106,10 +121,16 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Input")
 	virtual void DoJumpEnd();
 
+	UFUNCTION(BlueprintCallable, Category="Input")
+	virtual void Shoot();
+
 private:
 	UFUNCTION()
 	void HandleProgressArmLength(float Length);
 	
 	UFUNCTION()
 	void HandleProgressCameraOffset(FVector Offset);
+
+	UFUNCTION()
+	void BulletTrace();
 };
