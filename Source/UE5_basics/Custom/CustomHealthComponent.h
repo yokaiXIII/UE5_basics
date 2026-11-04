@@ -34,7 +34,7 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FDeadDelegate Died;
 
-	UFUNCTION(BlueprintImplementableEvent)
+	UFUNCTION(BlueprintCallable)
 	bool IsAlive();
 
 	// Healing part

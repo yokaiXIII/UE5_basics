@@ -6,7 +6,9 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
 #include "Components/CapsuleComponent.h"
+#include "Custom/DamageComponent.h"
 #include "Custom/FPS_Target.h"
+#include "Custom/HitableActor.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 
@@ -48,6 +50,12 @@ AMyCustomCharacter::AMyCustomCharacter()
 
 	// Register Health Component
 	HealthComponent = CreateDefaultSubobject<UCustomHealthComponent>(TEXT("HealthComponent"));
+
+	// Hit Component
+	HitableComponent = CreateDefaultSubobject<UHitableActor>(TEXT("HitableComponent"));
+
+	// Hit Component
+	DamageComponent = CreateDefaultSubobject<UDamageComponent>(TEXT("DamageComponent"));
 }
 // Called when the game starts or when spawned
 void AMyCustomCharacter::BeginPlay()
@@ -73,7 +81,7 @@ void AMyCustomCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	AimTimeline.TickTimeline(DeltaTime);
-	if (IsShooting)
+	if (IsShooting && !IsStunned)
 		FireWeapon();
 	else
 		Hit.Init();
@@ -161,23 +169,27 @@ void AMyCustomCharacter::DoLook(float Yaw, float Pitch)
 
 void AMyCustomCharacter::DoJumpStart()
 {
+	if (IsStunned) return;
 	// signal the character to jump
 	Jump();
 }
 
 void AMyCustomCharacter::DoJumpEnd()
 {
+	if (IsStunned) return;
 	// signal the character to stop jumping
 	StopJumping();
 }
 
 void AMyCustomCharacter::Shoot()
 {
+	if (IsStunned) return;
 	IsShooting = true;
 }
 
 void AMyCustomCharacter::AimIn()
 {
+	if (IsStunned) return;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	AimTimeline.Play();
 	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Purple, "Aim IN");
@@ -185,6 +197,7 @@ void AMyCustomCharacter::AimIn()
 
 void AMyCustomCharacter::AimOut()
 {
+	if (IsStunned) return;
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 	AimTimeline.Reverse();
 	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, "Aim OUT");
@@ -192,15 +205,16 @@ void AMyCustomCharacter::AimOut()
 
 void AMyCustomCharacter::FireWeapon()
 {
+	if (IsStunned) return;
 	BulletTrace();
 	GEngine->AddOnScreenDebugMessage(-1, .5f, FColor::Red, "Firing");
 	auto ActorHit = Hit.GetActor();
 	if (!IsValid(ActorHit)) return;
 
-	auto Target = Cast<AFPS_Target>(ActorHit);
-	if (!IsValid(Target)) return;
+	auto TargetHitComponent = ActorHit->FindComponentByClass<UHitableActor>();
+	if (!IsValid(TargetHitComponent)) return;
 	GEngine->AddOnScreenDebugMessage(-1, .5f, FColor::Yellow, "Target Found");
-	Target->Hit(this);
+	TargetHitComponent->Hit(this);
 }
 
 void AMyCustomCharacter::StopShoot()

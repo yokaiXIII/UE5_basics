@@ -6,8 +6,11 @@
 #include "FPS_Target.h"
 #include "GameFramework/Actor.h"
 #include "Ball.generated.h"
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FBallRetrived);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FBallReleased);
+
+
 UCLASS()
 class UE5_BASICS_API ABall : public AFPS_Target
 {
@@ -43,5 +46,5 @@ public:
 	UFUNCTION(BlueprintCallable)
 	ACharacter* Released();
 
-	virtual void Hit(APawn* EventOrigin) override;
+	virtual void Hit(AActor* EventOrigin) override;
 };

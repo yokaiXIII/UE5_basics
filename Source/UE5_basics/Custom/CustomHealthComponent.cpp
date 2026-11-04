@@ -32,6 +32,11 @@ int UCustomHealthComponent::GetCurrentHealt()
 	return CurrentHealth;
 }
 
+bool UCustomHealthComponent::IsAlive()
+{
+	return CurrentHealth > 0;
+}
+
 void UCustomHealthComponent::TriggerHealingTick(float DeltaTime)
 {
 	if (!AwaitTickHealingTimeCondition(DeltaTime) || !AwaitNextHealingTick(DeltaTime)) return;

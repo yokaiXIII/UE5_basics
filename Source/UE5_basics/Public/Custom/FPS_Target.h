@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "FPS_Target.generated.h"
 
+class UHitableActor;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FFPS_Target_Hit);
 UCLASS()
@@ -25,11 +26,15 @@ protected:
 	virtual void BeginPlay() override;
 	UPROPERTY(BlueprintReadOnly)
 	int hitCounter = 0;
+	
+	// Hit component
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UHitableActor* HitableComponent;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	UFUNCTION(BlueprintCallable)
-	virtual void Hit(APawn* EventOrigin);
+	virtual void Hit(AActor* EventOrigin);
 
 	UFUNCTION(BlueprintCallable)
 	int GetHitCounter() const;

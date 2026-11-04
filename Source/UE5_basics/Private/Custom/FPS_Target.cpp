@@ -2,6 +2,7 @@
 
 
 #include "Custom/FPS_Target.h"
+#include "Custom/HitableActor.h"
 
 // Sets default values
 AFPS_Target::AFPS_Target()
@@ -9,6 +10,8 @@ AFPS_Target::AFPS_Target()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
+	// Hit Component
+	HitableComponent = CreateDefaultSubobject<UHitableActor>(TEXT("HitableComponent"));
 }
 
 // Called when the game starts or when spawned
@@ -25,7 +28,7 @@ void AFPS_Target::Tick(float DeltaTime)
 
 }
 
-void AFPS_Target::Hit(APawn* EventOrigin)
+void AFPS_Target::Hit(AActor* EventOrigin)
 {
 	hitCounter++;
 	HitEvent.Broadcast();

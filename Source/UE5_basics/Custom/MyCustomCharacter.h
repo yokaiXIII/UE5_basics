@@ -16,6 +16,8 @@ class UInputMappingContext;
 class UInputAction;
 class UEnhancedInputComponent;
 class UCustomHealthComponent;
+class UHitableActor;
+class UDamageComponent;
 
 UCLASS()
 class UE5_BASICS_API AMyCustomCharacter : public ACharacter
@@ -43,6 +45,14 @@ public:
 	// Health component
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UCustomHealthComponent* HealthComponent;
+
+	// Hit component
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UHitableActor* HitableComponent;
+	
+	// Hit component
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UDamageComponent* DamageComponent;
 
 	// Shooting variables
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
@@ -123,6 +133,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Input")
 	virtual void Shoot();
+
+	UPROPERTY(BlueprintReadWrite)
+	bool IsStunned = false;
 
 private:
 	UFUNCTION()

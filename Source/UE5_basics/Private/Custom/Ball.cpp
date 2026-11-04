@@ -3,6 +3,7 @@
 
 #include "Custom/Ball.h"
 
+#include "Custom/HitableActor.h"
 #include "GameFramework/Character.h"
 
 // Sets default values
@@ -10,6 +11,7 @@ ABall::ABall()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	HitableComponent->HitActorEvent.AddDynamic(this, &ABall::Hit);
 }
 
 // Called when the game starts or when spawned
@@ -39,6 +41,7 @@ void ABall::Tick(float DeltaTime)
 void ABall::Taken(ACharacter* NewHolder)
 {
 	Holder = NewHolder;
+	this->AttachToComponent(NewHolder->GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, "BallHolder");
 	ChangeMeshVisibility(false);
 }
 
@@ -48,12 +51,13 @@ ACharacter* ABall::Released()
 	Holder = nullptr;
 	this->SetActorLocation(OldHolder->GetActorForwardVector() * 100);
 	
+	this->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 	ChangeMeshVisibility(true);
 	
 	return OldHolder;
 }
 
-void ABall::Hit(APawn* EventOrigin)
+void ABall::Hit(AActor* EventOrigin)
 {
 	Super::Hit(EventOrigin);
 
