@@ -75,17 +75,14 @@ void ATP_Character::BeginPlay() {
 	bCanMove = true;
 	MagBullets = Arsenal[ActiveWeapon].MagCapacity;
 	FireTime = 0.0f;
-	FVector WeaponLocation = GetMesh()->GetSocketLocation("hand_rSocket");
-	FRotator WeaponRotaion = GetMesh()->GetSocketRotation("hand_rSocket");
 	
 	MaxSpeedWalkingOrig = GetCharacterMovement()->MaxWalkSpeed;
 	if (MovementCurve && OffsetCurve) {
-		// Distanza dal Player
-		FOnTimelineFloat ProgressFunctionLength; // funzione di timeline di tipo float
-		ProgressFunctionLength.BindUFunction(this, "HandleProgressArmLength"); // buinding della funzione
-		AimTimeline.AddInterpFloat(MovementCurve, ProgressFunctionLength); // legare la funzione di timeline alla timeline
+		FOnTimelineFloat ProgressFunctionLength;
+		ProgressFunctionLength.BindUFunction(this, "HandleProgressArmLength");
+		AimTimeline.AddInterpFloat(MovementCurve, ProgressFunctionLength);
 
-		FOnTimelineVector ProgressFunctionOffset; // timeline di tipo vector
+		FOnTimelineVector ProgressFunctionOffset;
 		ProgressFunctionOffset.BindUFunction(this, "HandleProgressCameraOffset");
 		AimTimeline.AddInterpVector(OffsetCurve, ProgressFunctionOffset);
 
@@ -138,6 +135,7 @@ void ATP_Character::HandleProgressCrouch(float Height) {
 void ATP_Character::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) {
 	// Set up gameplay key bindings
 	check(PlayerInputComponent);
+	
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ATP_Character::JumpCharacter);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ATP_Character::StopJumpingCharacter);
 	
@@ -324,15 +322,16 @@ void ATP_Character::FireFromWeapon() {
 		End = Start + (WeaponMesh->GetComponentRotation().Vector() * WeaponRange);
 	}
 
-	bool bHit = GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Pawn, Params);
+	bool bHit = GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Camera, Params);
 	OnCharacterTraceLine.Broadcast();
-
+	
 	if (bHit) {
 		//DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 3.0f);
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), Arsenal[ActiveWeapon].HitEFX, Hit.ImpactPoint);
+		OnHitActor.Broadcast(Hit.GetActor(), Hit);
 		AEnemy* HitActor = Cast<AEnemy>(Hit.GetActor());
-
-		if (HitActor) {
+		
+		if (IsValid(HitActor)) {			
 			HitActor->GetHealthComponent()->GetDamage(Arsenal[ActiveWeapon].Damage);
 		}
 	}
@@ -385,19 +384,15 @@ FWeaponSlot ATP_Character::RetrieveActiveWeapon() {
 // Mechanic: Cover
 
 void ATP_Character::ToggleCover() {
-	bool bIsNear = CheckAroundMe(CheckCoverRadius);
-	if (bIsNear) { // Check if cover is near
+	const bool bIsNear = CheckAroundMe(CheckCoverRadius);
+	if (bIsNear) {
 		bIsInCover = !bIsInCover;
-		// DEBUG message
-		if (bIsInCover) {
-			GEngine->AddOnScreenDebugMessage(-1, 2.2f, FColor::Green, TEXT("Cover now!"));
-		} else {
-			GEngine->AddOnScreenDebugMessage(-1, 2.2f, FColor::Green, TEXT("Not Cover now!"));
-		}
-		
-		if (bIsInCover && Cover) {			
+        
+		if (bIsInCover && Cover) {            
 			FRotator CoverRotation;
-			Cover->RetrieveMovementDirectionAndFacingRotation(CoverDirectionMovement, CoverRotation);
+			Cover->RetrieveMovementDirectionAndFacingRotation(this, CoverDirectionMovement, CoverRotation);
+            
+			// Imposta la rotazione del personaggio verso la parete
 			SetActorRotation(CoverRotation);
 			CrouchCharacter();
 		} else {
