@@ -10,6 +10,7 @@
 #include "GameFramework/Character.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "UE5_basics/Other/CoverActor.h"
 #include "MyCustomCharacter.generated.h"
 
 class UInputMappingContext;
@@ -125,6 +126,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category="Input")
 	UInputAction* ShootAction;
+	
+	UPROPERTY(EditAnywhere, Category="Input")
+	UInputAction* CrouchAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Input")
 	TObjectPtr<UInputMappingContext> DefaultMappingContext;
@@ -176,9 +180,20 @@ private:
 	void BulletTrace();
 	void CrouchCharacter();
 	void StopCrouchCharacter();
-	
+	void ToggleCover();
+	void ExitFromCover();
+	bool CheckAroundMe(float Radius);
+
 	bool bIsAiming;
 	bool bIsInCover;
 	
 	float MaxSpeedWalkingOrig;
+	
+	/** Pointer to cover*/
+	ACoverActor* Cover;
+	
+	/** This variable stores the allowed movement while player is covering*/
+	FVector CoverDirectionMovement;
+	
+	float CheckCoverRadius = 60.0f;
 };

@@ -122,6 +122,9 @@ void AMyCustomCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 		// Shoot
 		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Triggered, this, &AMyCustomCharacter::Shoot);
 		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Completed, this, &AMyCustomCharacter::StopShoot);
+		
+		// Cover
+		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Triggered, this, &AMyCustomCharacter::ToggleCover);
 
 		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Purple, "Binded Actions");
 	}
@@ -306,4 +309,52 @@ void AMyCustomCharacter::StopCrouchCharacter() {
 		CrouchTimeline.Reverse();
 		OnCharacterUncrouch.Broadcast();
 	}
+}
+
+void AMyCustomCharacter::ToggleCover() {
+	const bool bIsNear = CheckAroundMe(CheckCoverRadius);
+	if (bIsNear) {
+		bIsInCover = !bIsInCover;
+        
+		if (bIsInCover && Cover) {            
+			FRotator CoverRotation;
+			Cover->RetrieveMovementDirectionAndFacingRotation(this, CoverDirectionMovement, CoverRotation);
+            
+			// Imposta la rotazione del personaggio verso la parete
+			SetActorRotation(CoverRotation);
+			CrouchCharacter();
+		} else {
+			ExitFromCover();
+		}
+	}
+}
+
+void AMyCustomCharacter::ExitFromCover() {
+	bIsInCover = false;
+	StopCrouchCharacter();
+}
+
+bool AMyCustomCharacter::CheckAroundMe(float Radius) {
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
+
+	FCollisionShape CollShape = FCollisionShape::MakeSphere(Radius);
+
+	TArray<FHitResult> HitResults;
+
+	FVector Pos = GetCapsuleComponent()->GetComponentLocation();
+	bool bHit = GetWorld()->SweepMultiByChannel(HitResults, Pos, Pos, FQuat::Identity, ECC_Pawn, CollShape, Params);
+	//DrawDebugSphere(GetWorld(), Pos, Radius, 12, FColor::Orange, false, 0.2f);
+	
+	if (bHit) {
+		for (auto& HitActor : HitResults) {
+			ACoverActor* HitCover = Cast<ACoverActor>(HitActor.GetActor());
+			if (HitCover) {
+				Cover = HitCover;
+				return true;
+			}
+		}
+	}
+
+	return false;
 }
