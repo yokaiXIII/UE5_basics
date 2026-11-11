@@ -19,6 +19,8 @@ class UCustomHealthComponent;
 class UHitableActor;
 class UDamageComponent;
 
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FAnimStateCharacter);
 UCLASS()
 class UE5_BASICS_API AMyCustomCharacter : public ACharacter
 {
@@ -33,6 +35,10 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Timeline")
 	UCurveVector* OffsetCurve;
+	
+	
+	UPROPERTY(EditAnywhere, Category = "Timeline")
+	UCurveFloat* CrouchCurve;
 
 	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
@@ -62,12 +68,34 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	bool IsShooting = false;
+	
+	/** Broadcasted when character start aiming */
+	UPROPERTY(BlueprintAssignable)
+	FAnimStateCharacter OnCharacterAim;
+	/** Broadcsted when character stop aiming */
+	UPROPERTY(BlueprintAssignable)
+	FAnimStateCharacter OnCharacterStopAim;
+	/** Broadcasted when character crouching */
+	UPROPERTY(BlueprintAssignable)
+	FAnimStateCharacter OnCharacterCrouch;
+	/** Broadcasted when character stop crouching */
+	UPROPERTY(BlueprintAssignable)
+	FAnimStateCharacter OnCharacterUncrouch;
+	
+	/** Walk speed while aiming. */
+	UPROPERTY(EditAnywhere, Category = "Aim")
+	float MaxSpeedAiming = 150.0f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MinCrouchDistance = 30.0f;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	FTimeline AimTimeline;
+	/** Timeline used to crouch character*/
+	FTimeline CrouchTimeline;
 
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
@@ -146,4 +174,11 @@ private:
 
 	UFUNCTION()
 	void BulletTrace();
+	void CrouchCharacter();
+	void StopCrouchCharacter();
+	
+	bool bIsAiming;
+	bool bIsInCover;
+	
+	float MaxSpeedWalkingOrig;
 };

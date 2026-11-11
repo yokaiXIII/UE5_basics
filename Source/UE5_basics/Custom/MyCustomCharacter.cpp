@@ -10,6 +10,7 @@
 #include "Custom/FPS_Target.h"
 #include "Custom/HitableActor.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "UE5_basics/TP_Character/TP_Character.h"
 
 
 // Sets default values
@@ -73,6 +74,12 @@ void AMyCustomCharacter::BeginPlay()
 		ProgressFunctionVector.BindUFunction(this, "HandleProgressCameraOffset");
 		AimTimeline.AddInterpVector(OffsetCurve, ProgressFunctionVector);
 	}
+	
+	if (CrouchCurve) {
+		FOnTimelineFloat ProgressFunctionCrouch;
+		ProgressFunctionCrouch.BindUFunction(this, "HandleProgressCrouch");
+		CrouchTimeline.AddInterpFloat(CrouchCurve, ProgressFunctionCrouch);
+	}
 }
 
 // Called every frame
@@ -81,6 +88,7 @@ void AMyCustomCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	AimTimeline.TickTimeline(DeltaTime);
+	CrouchTimeline.TickTimeline(DeltaTime);
 	if (IsShooting && !IsStunned)
 		FireWeapon();
 	else
@@ -187,20 +195,32 @@ void AMyCustomCharacter::Shoot()
 	IsShooting = true;
 }
 
-void AMyCustomCharacter::AimIn()
-{
-	if (IsStunned) return;
-	GetCharacterMovement()->bOrientRotationToMovement = true;
+void AMyCustomCharacter::AimIn() {
+	GEngine->AddOnScreenDebugMessage(-1, 0.2f, FColor::Green, TEXT("Aim In"));
+	bUseControllerRotationYaw = true;
+	GetCharacterMovement()->bOrientRotationToMovement = false;
+	GetCharacterMovement()->MaxWalkSpeed = MaxSpeedAiming;
+	bIsAiming = true;
+	if (bIsInCover) {
+		GEngine->AddOnScreenDebugMessage(-1, 0.2f, FColor::Green, TEXT("Aim from cover"));
+		StopCrouchCharacter();
+	}
 	AimTimeline.Play();
-	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Purple, "Aim IN");
+	OnCharacterAim.Broadcast();
 }
 
-void AMyCustomCharacter::AimOut()
-{
-	if (IsStunned) return;
-	GetCharacterMovement()->bOrientRotationToMovement = false;
+void AMyCustomCharacter::AimOut() {
+	GEngine->AddOnScreenDebugMessage(-1, 0.2f, FColor::Green, TEXT("Aim Out"));
+	bUseControllerRotationYaw = false;
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->MaxWalkSpeed = MaxSpeedWalkingOrig;
+	bIsAiming = false;
+	if (bIsInCover) {
+		GEngine->AddOnScreenDebugMessage(-1, 0.2f, FColor::Green, TEXT("Stop aim from cover"));
+		CrouchCharacter();
+	}
 	AimTimeline.Reverse();
-	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, "Aim OUT");
+	OnCharacterStopAim.Broadcast();
 }
 
 void AMyCustomCharacter::FireWeapon()
@@ -264,4 +284,26 @@ void AMyCustomCharacter::BulletTrace()
 
 	World->LineTraceSingleByChannel(Hit, startLocation, endLocation, ECC_Pawn, Params);
 	DrawDebugLine(World, startLocation, endLocation, FColor::Red, false, 0.5, 0, 2);
+}
+
+//////////////////////////////////////////////////////////////////////////
+// Mechanic: Crouch
+
+void AMyCustomCharacter::CrouchCharacter() {
+	
+	if (CanCrouch()) {
+		GEngine->AddOnScreenDebugMessage(-1, 0.2f, FColor::Green, TEXT("Crouch in"));
+		Crouch();
+		CrouchTimeline.Play();
+		OnCharacterCrouch.Broadcast();
+	}
+}
+
+void AMyCustomCharacter::StopCrouchCharacter() {
+	GEngine->AddOnScreenDebugMessage(-1, 0.2f, FColor::Green, TEXT("Uncrouch"));
+	if (GetCharacterMovement()->IsCrouching()) {
+		UnCrouch();
+		CrouchTimeline.Reverse();
+		OnCharacterUncrouch.Broadcast();
+	}
 }
