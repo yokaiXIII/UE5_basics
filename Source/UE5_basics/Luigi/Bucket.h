@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "HitComponent.h"
 #include "GameFramework/Actor.h"
 #include "Bucket.generated.h"
 
@@ -24,7 +25,10 @@ public:
 
 	// Funzione da chiamare via evento per il respawn casuale
 	UFUNCTION(BlueprintCallable, Category = "Respawn")
-	void RespawnRandom();
+	void RespawnRandom(AActor* Striker);
+	
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Respawn")
+	UHitComponent* HitComponent;
 	
 protected:
 	// Called when the game starts or when spawned

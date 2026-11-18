@@ -9,14 +9,15 @@ ABucket::ABucket()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	HitComponent = CreateDefaultSubobject<UHitComponent>(FName("HitComponent"));
 }
 
 // Called when the game starts or when spawned
 void ABucket::BeginPlay()
 {
 	Super::BeginPlay();
-
-	RespawnRandom();
+	
+	HitComponent->OnHit.AddDynamic(this, &ABucket::RespawnRandom);
 }
 
 // Called every frame
@@ -25,7 +26,7 @@ void ABucket::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 }
-void ABucket::RespawnRandom()
+void ABucket::RespawnRandom(AActor* Striker)
 {
 	if (BallRespawnPoints.Num() == 0)
 	{
