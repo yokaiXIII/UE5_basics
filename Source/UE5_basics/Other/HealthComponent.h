@@ -29,6 +29,10 @@ private:
 	void AutoRecoveryHealth(float DeltaTime);
 
 	void CheckDamageTime(float DeltaTime);
+	FTimerHandle TimerHandle;
+	float DamageOverTime;
+	
+	void OnCooldownDoT();
 
 public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
@@ -45,16 +49,16 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FHealtDelegate OnHealthRecovery;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Healt: variables")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health: variables")
 	float Health;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Healt: variables")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health: variables")
 	bool bAutoRecovery = true;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Healt: variables")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health: variables")
 	float RecoveryQuantity = 1.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Healt: variables")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health: variables")
 	float HealthRecoveryTime = 0.2f;
 
 	/** Time to wait for recovery to start after receiving damage */
@@ -70,6 +74,9 @@ public:
 	/** Retrieve the health percentage */
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	float HealthPercentage();
-
-		
+	
+	UFUNCTION(BlueprintCallable, Category = "DOT")
+	void TriggerDamageOverTime(float frequency, float damage);
+	UFUNCTION(BlueprintCallable, Category = "DOT")
+	void StopDamageOverTime();
 };
