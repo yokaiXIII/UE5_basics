@@ -2,6 +2,7 @@
 
 
 #include "HealthComponent.h"
+#include "TimerManager.h"
 
 UHealthComponent::UHealthComponent() {
 	PrimaryComponentTick.bCanEverTick = true;
@@ -18,6 +19,11 @@ void UHealthComponent::BeginPlay() {
 	bIsDamaged = false;
 }
 
+
+void UHealthComponent::OnCooldownDoT()
+{
+	GetDamage(DamageOverTime);
+}
 
 void UHealthComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
@@ -68,4 +74,39 @@ void UHealthComponent::AutoRecoveryHealth(float DeltaTime) {
 
 float UHealthComponent::HealthPercentage() {
 	return HealthMaxValue == 0.0 ? 1.0f : (Health/HealthMaxValue);
+}
+
+void UHealthComponent::TriggerDamageOverTime(float frequency, float damage)
+{
+	auto world = GetWorld();
+	if (!world) return;
+	FTimerManager& TM = world->GetTimerManager();
+	DamageOverTime = damage;
+	if (DamageOverTime <= 0.0f)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 0.2f, FColor::Red, TEXT("Damage is ZERO!!!"));
+		return;
+	}
+	if (TM.IsTimerActive(TimerHandle))
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 0.2f, FColor::Orange, TEXT("Timer already active!!!"));
+		StopDamageOverTime();
+	}
+	TM.SetTimer(TimerHandle,
+		this,
+		&UHealthComponent::OnCooldownDoT,
+		frequency,		// rate
+		true   			// looping
+	);
+	
+}
+
+void UHealthComponent::StopDamageOverTime()
+{
+	DamageOverTime = 0.0f;
+	auto world = GetWorld();
+	if (!world) return;
+	FTimerManager& TM = world->GetTimerManager();
+	if (!TM.IsTimerActive(TimerHandle)) return;
+	TM.ClearTimer(TimerHandle);
 }
