@@ -286,4 +286,6 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+	
+	//TODO: fare il subsystem che che tiene il punteggio in base a quale actor entra in una determinata area
 };
