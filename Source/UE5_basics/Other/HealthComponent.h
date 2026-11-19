@@ -7,6 +7,7 @@
 #include "HealthComponent.generated.h"
 
 
+class APlayerCharacter;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FHealtDelegate);
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class UE5_BASICS_API UHealthComponent : public UActorComponent
@@ -62,8 +63,10 @@ public:
 	float HealthRecoveryTime = 0.2f;
 
 	/** Time to wait for recovery to start after receiving damage */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Healt: variables")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health: variables")
 	float NoDamageTimeForRecovery = 2.5f;
+
+	void GetDamageFromPlayer(APlayerCharacter* Player);
 
 	void GetDamage(float Amount);
 
