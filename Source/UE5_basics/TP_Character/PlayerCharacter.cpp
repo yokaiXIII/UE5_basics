@@ -82,6 +82,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	AimTimeline.TickTimeline(DeltaTime);
+	
 }
 
 #pragma region "Character Movement Logic"
