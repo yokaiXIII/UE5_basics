@@ -38,5 +38,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	void SetBallHolder(APlayerCharacter* NewHolder); 
+	
+	
+	void RetrivedBy(APlayerCharacter* perpetrator);
+	void Released(FVector forward, bool resetHolder = false);
 
 };

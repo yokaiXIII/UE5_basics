@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Ball.h"
+#include "UE5_basics/Public/Ball.h"
 
 // Sets default values
 ABall::ABall()
@@ -32,5 +32,15 @@ void ABall::SetBallHolder(APlayerCharacter* NewHolder)
 	if (IsValid(NewHolder))
 		return;
 	Holder = NewHolder;
+}
+
+void ABall::RetrivedBy(APlayerCharacter* perpetrator)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Green, "Retrived!!!");
+}
+
+void ABall::Released(FVector forward, bool resetHolder)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, "Released!!!");
 }
 

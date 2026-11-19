@@ -3,18 +3,19 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "HitComponent.h"
 #include "InputAction.h"
 #include "Camera/CameraComponent.h"
 #include "Components/TimelineComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "UE5_basics/Public/HitComponent.h"
 #include "PlayerCharacter.generated.h"
 
 class UInputMappingContext;
 class UInputAction;
 class UEnhancedInputComponent;
 class UHealthComponent;
+class ABall;
 
 UCLASS()
 class UE5_BASICS_API APlayerCharacter : public ACharacter
@@ -51,6 +52,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UHitComponent* HitComponent;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	ABall* BallRetrived;
 	
 protected:
 	// Called when the game starts or when spawned
@@ -91,10 +95,20 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category="Input")
 	UInputAction* ShootAction;
+	
+	
+	// Stun
+	bool IsStun = false;
+	void HandleHealthToZero();
+	void ToggleCommands(bool status);
+	void HandleHealthRecovery();
+	void ReturnedFullHealth();
 
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	void OnComponentHit(UPrimitiveComponent* Component, AActor* OtherActor, UPrimitiveComponent* OtherComp,
+						FVector NormalImpulse, const FHitResult& Hit);
 
 	void AimIn();
 	void AimOut();
@@ -130,5 +144,5 @@ private:
 	void HandleProgressCameraOffset(FVector Offset);
 
 	UFUNCTION()
-	void FireFromWeapon();
+	void Throw();
 };

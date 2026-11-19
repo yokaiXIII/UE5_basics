@@ -10,6 +10,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "UE5_basics/Other/HealthComponent.h"
 #include "UE5_basics/Enemy/Enemy.h"
+#include "UE5_basics/Public/HitComponent.h"
+#include "UE5_basics/Public/Ball.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -49,6 +51,10 @@ APlayerCharacter::APlayerCharacter()
 
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 	HitComponent = CreateDefaultSubobject<UHitComponent>(TEXT("HitComponent"));
+	
+	
+	HealthComponent->OnHealtToZero.AddDynamic(this, &APlayerCharacter::HandleHealthToZero);
+	HealthComponent->OnHealthRecovery.AddDynamic(this, &APlayerCharacter::HandleHealthRecovery);
 }
 
 // Called when the game starts or when spawned
@@ -73,8 +79,56 @@ void APlayerCharacter::BeginPlay()
 	
 
 	HitComponent->OnHit.AddDynamic(this , &APlayerCharacter::HandleHit);
+	
+	// Physics collision
+	auto mesh = GetCapsuleComponent();
+	if (IsValid(mesh))
+	{
+		mesh->OnComponentHit.AddDynamic(this, &APlayerCharacter::OnComponentHit);
+	}
 }
 
+
+void APlayerCharacter::HandleHealthToZero()
+{
+	if (IsStun) return;
+	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Purple, "STUNNED!!!");
+	IsStun = true;
+	ToggleCommands(false);
+	if (IsValid(BallRetrived) && BallRetrived != nullptr)
+	{
+		BallRetrived->Released(FollowCamera->GetForwardVector(), true);
+	}
+}
+
+void APlayerCharacter::ToggleCommands(bool status)
+{
+	APlayerController* PC = Cast<APlayerController>(Controller);
+	if (!IsValid(PC)) return;
+	if (status)
+	{
+		EnableInput(PC);
+	}else
+	{
+		DisableInput(PC);
+	}
+}
+
+void APlayerCharacter::HandleHealthRecovery()
+{
+	if (!IsStun) return;
+	if (HealthComponent->HealthPercentage() >= 1.0f)
+	{
+		ReturnedFullHealth();
+	}
+}
+
+void APlayerCharacter::ReturnedFullHealth()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, "Full HEALTH!!!");
+	IsStun = false;
+	ToggleCommands(true);
+}
 
 // Called every frame
 void APlayerCharacter::Tick(float DeltaTime)
@@ -83,6 +137,14 @@ void APlayerCharacter::Tick(float DeltaTime)
 
 	AimTimeline.TickTimeline(DeltaTime);
 	
+}
+
+void APlayerCharacter::OnComponentHit(UPrimitiveComponent* Component, AActor* OtherActor,
+										UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
+	auto castBallActor = Cast<ABall>(OtherActor);
+	if (!IsValid(castBallActor)) return;
+	castBallActor->RetrivedBy(this);
 }
 
 #pragma region "Character Movement Logic"
@@ -110,7 +172,7 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Look);
 
 		//Shooting
-		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Started, this, &APlayerCharacter::FireFromWeapon);
+		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Started, this, &APlayerCharacter::Throw);
 	}
 }
 
@@ -217,35 +279,12 @@ void APlayerCharacter::HandleHit(AActor* hitter)
 }
 
 
-void APlayerCharacter::FireFromWeapon()
+void APlayerCharacter::Throw()
 {
-	FCollisionQueryParams Params;
-
-	const auto MyWorld = GetWorld();
-	if (!IsValid(MyWorld))
+	if (IsValid(BallRetrived) && BallRetrived != nullptr)
 	{
+		BallRetrived->Released(FollowCamera->GetForwardVector());
 		return;
-	}
-
-	Params.AddIgnoredActor(UGameplayStatics::GetPlayerPawn(MyWorld, 0));
-
-	FHitResult Hit;
-	float WeaponRange = 2000;
-
-	FVector Start = FollowCamera->GetComponentLocation();
-	FVector End = Start + (FollowCamera->GetForwardVector() * WeaponRange);
-
-	bool bhit = GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Camera, Params);
-	
-	DrawDebugLine(GetWorld(), Start, End, FColor::Red, true, 1, 1, 4);
-	
-	if (bhit)
-	{
-		AActor* HitActor = Hit.GetActor();
-		UHitComponent* hitResult = HitActor->FindComponentByClass<UHitComponent>();
-		if (!IsValid(hitResult))
-			return;
-		hitResult->OnHit.Broadcast(this);
 	}
 }
 
