@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "HitComponent.h"
 #include "InputAction.h"
 #include "Camera/CameraComponent.h"
 #include "Components/TimelineComponent.h"
@@ -13,6 +14,7 @@
 class UInputMappingContext;
 class UInputAction;
 class UEnhancedInputComponent;
+class UHealthComponent;
 
 UCLASS()
 class UE5_BASICS_API APlayerCharacter : public ACharacter
@@ -37,13 +39,18 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FollowCamera;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Damage")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
 	int StaminaDamage;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	FString SocketName = "RightHandSocket";
 
-	//TODO: add the HealthComponent once it is created / updated.
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UHealthComponent* HealthComponent;
+	
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UHitComponent* HitComponent;
 	
 protected:
 	// Called when the game starts or when spawned
@@ -91,10 +98,14 @@ public:
 
 	void AimIn();
 	void AimOut();
+
 	
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	UFUNCTION(BlueprintCallable)
+	void HandleHit(AActor* hitter);
+	
 	/** Handles move inputs from either controls or UI interfaces */
 	UFUNCTION(BlueprintCallable, Category="Input")
 	virtual void DoMove(float Right, float Forward);

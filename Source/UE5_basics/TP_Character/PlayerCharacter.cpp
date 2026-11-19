@@ -8,6 +8,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Kismet/GameplayStatics.h"
+#include "UE5_basics/Other/HealthComponent.h"
 #include "UE5_basics/Enemy/Enemy.h"
 
 // Sets default values
@@ -46,7 +47,8 @@ APlayerCharacter::APlayerCharacter()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false;
 
-	//TODO: add the HealthComponent once it is created.
+	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
+	HitComponent = CreateDefaultSubobject<UHitComponent>(TEXT("HitComponent"));
 }
 
 // Called when the game starts or when spawned
@@ -68,7 +70,11 @@ void APlayerCharacter::BeginPlay()
 		OffsetFunctionLength.BindUFunction(this, "HandleProgressCameraOffset");
 		AimTimeline.AddInterpVector(OffsetCurve, OffsetFunctionLength);
 	}
+	
+
+	HitComponent->OnHit.AddDynamic(this , &APlayerCharacter::HandleHit);
 }
+
 
 // Called every frame
 void APlayerCharacter::Tick(float DeltaTime)
@@ -76,7 +82,10 @@ void APlayerCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	AimTimeline.TickTimeline(DeltaTime);
+	
 }
+
+#pragma region "Character Movement Logic"
 
 // Called to bind functionality to input
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -191,6 +200,23 @@ void APlayerCharacter::HandleProgressCameraOffset(FVector Offset) {
 	CameraBoom->SocketOffset = Offset;
 }
 
+#pragma endregion 
+
+void APlayerCharacter::HandleHit(AActor* hitter)
+{
+	if(!IsValid(hitter))
+		return;
+	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, "COLPITO!");
+	APlayerCharacter* player = Cast<APlayerCharacter>(hitter);
+	if(!IsValid(player))
+		return;
+
+
+
+	HealthComponent->GetDamageFromPlayer(player);
+}
+
+
 void APlayerCharacter::FireFromWeapon()
 {
 	FCollisionQueryParams Params;
@@ -215,7 +241,11 @@ void APlayerCharacter::FireFromWeapon()
 	
 	if (bhit)
 	{
-		//TODO: add the hit component section to register the stamina loss.
+		AActor* HitActor = Hit.GetActor();
+		UHitComponent* hitResult = HitActor->FindComponentByClass<UHitComponent>();
+		if (!IsValid(hitResult))
+			return;
+		hitResult->OnHit.Broadcast(this);
 	}
 }
 
