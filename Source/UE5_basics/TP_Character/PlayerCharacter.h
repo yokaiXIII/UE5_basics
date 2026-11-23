@@ -99,9 +99,15 @@ protected:
 	
 	// Stun
 	bool IsStun = false;
+	
+	UFUNCTION()
 	void HandleHealthToZero();
+	
 	void ToggleCommands(bool status);
+
+	UFUNCTION()
 	void HandleHealthRecovery();
+	
 	void ReturnedFullHealth();
 
 public:	
