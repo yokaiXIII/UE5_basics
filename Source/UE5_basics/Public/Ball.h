@@ -43,4 +43,7 @@ public:
 	void RetrivedBy(APlayerCharacter* perpetrator);
 	void Released(FVector forward, bool resetHolder = false);
 
+	UFUNCTION(BlueprintCallable)
+	void ToggleCollision(bool ctx);
+
 };

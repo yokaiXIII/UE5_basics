@@ -41,6 +41,13 @@ void ABall::RetrivedBy(APlayerCharacter* perpetrator)
 
 void ABall::Released(FVector forward, bool resetHolder)
 {
+	ToggleCollision(true);
 	GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, "Released!!!");
+	
+}
+
+void ABall::ToggleCollision(bool ctx)
+{
+	SetActorEnableCollision(ctx);
 }
 

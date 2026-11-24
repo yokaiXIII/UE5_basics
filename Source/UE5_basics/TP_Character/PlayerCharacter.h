@@ -44,7 +44,7 @@ public:
 	int StaminaDamage;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	FString SocketName = "RightHandSocket";
+	FString SocketName = "hand_rSocket";
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UHealthComponent* HealthComponent;
@@ -119,6 +119,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void HandleHit(AActor* hitter);
+
+	UFUNCTION(BlueprintCallable)
+	void PickupBall(ABall* Ball);
 	
 	/** Handles move inputs from either controls or UI interfaces */
 	UFUNCTION(BlueprintCallable, Category="Input")

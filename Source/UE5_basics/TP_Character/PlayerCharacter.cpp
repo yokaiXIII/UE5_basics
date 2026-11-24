@@ -279,11 +279,39 @@ void APlayerCharacter::HandleHit(AActor* hitter)
 }
 
 
+void APlayerCharacter::PickupBall(ABall* Ball)
+{
+	if(!IsValid(Ball))
+		return;
+	BallRetrived = Ball;
+	BallRetrived->SetBallHolder(this);
+	
+
+	FAttachmentTransformRules Rules(
+			EAttachmentRule::SnapToTarget,   // Location
+			EAttachmentRule::SnapToTarget,   // Rotation
+			EAttachmentRule::KeepRelative,   // Scale
+			true                             // Weld simulated bodies
+		);
+	BallRetrived->ToggleCollision(false);
+	BallRetrived->AttachToComponent(GetMesh() , Rules , FName(SocketName));
+}
+
+
 void APlayerCharacter::Throw()
 {
 	if (IsValid(BallRetrived) && BallRetrived != nullptr)
 	{
+
+		BallRetrived->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+
+
+		
 		BallRetrived->Released(FollowCamera->GetForwardVector());
+
+		BallRetrived = nullptr;
+		
+		
 		return;
 	}
 }
