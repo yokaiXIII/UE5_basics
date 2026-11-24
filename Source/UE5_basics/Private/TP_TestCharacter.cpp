@@ -14,7 +14,9 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "Materials/MaterialInterface.h"
 #include "Kismet/GameplayStatics.h"
+#include "Engine/World.h"
 #include "UE5_basics/Enemy/Enemy.h"
 class UEnhancedInputLocalPlayerSubsystem;
 // Sets default values
@@ -81,6 +83,27 @@ void ATP_TestCharacter::BeginPlay()
 		ProgressFunctionOffset.BindUFunction(this, "HandleProgressCameraOffset");
 		AimTimeline.AddInterpVector(OffsetCurve, ProgressFunctionOffset);
 	}
+
+	if (UWorld* World = GetWorld())
+	{
+		if (USoccerSubsystem* SoccerSubsystem = World->GetSubsystem<USoccerSubsystem>())
+		{
+			SoccerSubsystem->RegisterPlayer(this);
+		}
+	}
+}
+
+void ATP_TestCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	if (UWorld* World = GetWorld())
+	{
+		if (USoccerSubsystem* SoccerSubsystem = World->GetSubsystem<USoccerSubsystem>())
+		{
+			SoccerSubsystem->UnregisterPlayer(this);
+		}
+	}
+
+	Super::EndPlay(EndPlayReason);
 }
 
 void ATP_TestCharacter::NotifyControllerChanged()
@@ -258,12 +281,36 @@ void ATP_TestCharacter::SetTeamColor(const FLinearColor& TeamColor)
 		const int32 NumMaterials = MeshComp->GetNumMaterials();
 		for (int32 MatIdx = 0; MatIdx < NumMaterials; ++MatIdx)
 		{
-			UMaterialInstanceDynamic* DynMaterial = MeshComp->CreateAndSetMaterialInstanceDynamic(MatIdx);
+			UMaterialInstanceDynamic* DynMaterial = Cast<UMaterialInstanceDynamic>(MeshComp->GetMaterial(MatIdx));
+			if (!IsValid(DynMaterial))
+			{
+				DynMaterial = MeshComp->CreateAndSetMaterialInstanceDynamic(MatIdx);
+			}
+
 			if (IsValid(DynMaterial))
 			{
-				DynMaterial->SetVectorParameterValue(TEXT("Color"), TeamColor);
-				DynMaterial->SetVectorParameterValue(TEXT("BaseColor"), TeamColor);
-				DynMaterial->SetVectorParameterValue(TEXT("Tint"), TeamColor);
+				TArray<FMaterialParameterInfo> VectorParameterInfos;
+				TArray<FGuid> VectorParameterIds;
+				DynMaterial->GetAllVectorParameterInfo(VectorParameterInfos, VectorParameterIds);
+
+				bool bFoundColorParameter = false;
+				for (const FName& ParameterName : TeamColorParameterNames)
+				{
+					const bool bParameterExists = VectorParameterInfos.ContainsByPredicate([&ParameterName](const FMaterialParameterInfo& ParameterInfo)
+					{
+						return ParameterInfo.Name == ParameterName;
+					});
+					if (bParameterExists)
+					{
+						DynMaterial->SetVectorParameterValue(ParameterName, TeamColor);
+						bFoundColorParameter = true;
+					}
+				}
+
+				if (!bFoundColorParameter)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("%s: nessun parametro colore vettoriale trovato sul materiale %d."), *GetName(), MatIdx);
+				}
 			}
 		}
 	}

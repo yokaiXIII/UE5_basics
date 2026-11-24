@@ -17,84 +17,205 @@ void USoccerSubsystem::InitializeMatch()
 		return;
 	}
 
-	// 1. Raccoglie tutti i player e tutte le porte presenti
+	for (const TWeakObjectPtr<AHitCounter>& GoalPtr : RegisteredGoals)
+	{
+		if (AHitCounter* Goal = GoalPtr.Get())
+		{
+			Goal->SetGoalOwner(nullptr, FLinearColor::White);
+		}
+	}
+
+	PlayerGoals.Reset();
+	RegisteredPlayers.Reset();
+	RegisteredGoals.Reset();
+
+	// Raccoglie tutti i player e tutte le porte presenti, inclusi quelli già spawnati.
 	TArray<AActor*> FoundPlayers;
 	UGameplayStatics::GetAllActorsOfClass(World, ATP_TestCharacter::StaticClass(), FoundPlayers);
 
 	TArray<AActor*> FoundGoals;
 	UGameplayStatics::GetAllActorsOfClass(World, AHitCounter::StaticClass(), FoundGoals);
 
-	if (FoundPlayers.Num() == 0 && GEngine)
+	for (AActor* Actor : FoundPlayers)
 	{
-		GEngine->AddOnScreenDebugMessage(
-			-1,
-			4.0f,
-			FColor::Red,
-			TEXT("SoccerSubsystem: Nessun Player trovato durante InitializeMatch! Chiamare con un piccolo delay dopo lo spawn."));
+		if (ATP_TestCharacter* Player = Cast<ATP_TestCharacter>(Actor))
+		{
+			RegisteredPlayers.Add(Player);
+		}
 	}
 
-	if (FoundGoals.Num() == 0 && GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(
-			-1,
-			4.0f,
-			FColor::Red,
-			TEXT("SoccerSubsystem: Nessuna Porta trovata durante InitializeMatch!"));
-	}
-
-	const TArray<FLinearColor> TeamColors = {
-		FLinearColor(0.05f, 0.25f, 1.0f, 1.0f), // Blu
-		FLinearColor(1.0f, 0.05f, 0.05f, 1.0f)  // Rosso
-	};
-
-	TArray<AHitCounter*> AvailableGoals;
 	for (AActor* Actor : FoundGoals)
 	{
 		if (AHitCounter* Goal = Cast<AHitCounter>(Actor))
 		{
-			AvailableGoals.Add(Goal);
+			RegisteredGoals.Add(Goal);
+			Goal->SetGoalOwner(nullptr, FLinearColor::White);
 		}
 	}
 
-	// 2. Associa ogni giocatore alla porta piu' vicina
-	for (int32 PlayerIdx = 0; PlayerIdx < FoundPlayers.Num(); ++PlayerIdx)
+	TryAssignGoals();
+}
+
+void USoccerSubsystem::RegisterPlayer(ATP_TestCharacter* Player)
+{
+	if (IsValid(Player))
 	{
-		ATP_TestCharacter* Player = Cast<ATP_TestCharacter>(FoundPlayers[PlayerIdx]);
+		RegisteredPlayers.AddUnique(TWeakObjectPtr<ATP_TestCharacter>(Player));
+		TryAssignGoals();
+	}
+}
+
+void USoccerSubsystem::UnregisterPlayer(ATP_TestCharacter* Player)
+{
+	if (Player == nullptr)
+	{
+		return;
+	}
+
+	const TWeakObjectPtr<ATP_TestCharacter> PlayerPtr(Player);
+	if (TWeakObjectPtr<AHitCounter>* GoalPtr = PlayerGoals.Find(PlayerPtr))
+	{
+		if (AHitCounter* Goal = GoalPtr->Get())
+		{
+			Goal->SetGoalOwner(nullptr, FLinearColor::White);
+		}
+		PlayerGoals.Remove(PlayerPtr);
+	}
+
+	RegisteredPlayers.Remove(PlayerPtr);
+	TryAssignGoals();
+}
+
+void USoccerSubsystem::RegisterGoal(AHitCounter* Goal)
+{
+	if (IsValid(Goal))
+	{
+		RegisteredGoals.AddUnique(TWeakObjectPtr<AHitCounter>(Goal));
+		TryAssignGoals();
+	}
+}
+
+void USoccerSubsystem::UnregisterGoal(AHitCounter* Goal)
+{
+	if (Goal == nullptr)
+	{
+		return;
+	}
+
+	const TWeakObjectPtr<AHitCounter> GoalPtr(Goal);
+	RegisteredGoals.Remove(GoalPtr);
+	for (auto It = PlayerGoals.CreateIterator(); It; ++It)
+	{
+		if (It.Value() == GoalPtr)
+		{
+			It.RemoveCurrent();
+		}
+	}
+
+	TryAssignGoals();
+}
+
+AHitCounter* USoccerSubsystem::GetGoalForPlayer(ATP_TestCharacter* Player) const
+{
+	if (const TWeakObjectPtr<AHitCounter>* GoalPtr = PlayerGoals.Find(TWeakObjectPtr<ATP_TestCharacter>(Player)))
+	{
+		return GoalPtr->Get();
+	}
+
+	return nullptr;
+}
+
+void USoccerSubsystem::TryAssignGoals()
+{
+	RegisteredPlayers.RemoveAll([](const TWeakObjectPtr<ATP_TestCharacter>& Player)
+	{
+		return !Player.IsValid();
+	});
+	RegisteredGoals.RemoveAll([](const TWeakObjectPtr<AHitCounter>& Goal)
+	{
+		return !Goal.IsValid();
+	});
+	for (auto It = PlayerGoals.CreateIterator(); It; ++It)
+	{
+		if (!It.Key().IsValid() || !It.Value().IsValid())
+		{
+			if (AHitCounter* Goal = It.Value().Get())
+			{
+				Goal->SetGoalOwner(nullptr, FLinearColor::White);
+			}
+			It.RemoveCurrent();
+		}
+	}
+
+	int32 PlayerIndex = 0;
+	for (const TWeakObjectPtr<ATP_TestCharacter>& PlayerPtr : RegisteredPlayers)
+	{
+		ATP_TestCharacter* Player = PlayerPtr.Get();
 		if (!IsValid(Player))
 		{
 			continue;
 		}
 
-		// print on screen player index
-		FString PlayerIndexStr = FString::Printf(TEXT("Player index: %d"), PlayerIdx);
-
-		const FLinearColor Color = TeamColors.IsValidIndex(PlayerIdx) ? TeamColors[PlayerIdx] : FLinearColor::White;
+		const FLinearColor Color = TeamColors.IsValidIndex(PlayerIndex) ? TeamColors[PlayerIndex] : FLinearColor::White;
 		Player->SetTeamColor(Color);
-		
-		// Trova la porta piu' vicina ancora non assegnata
+		++PlayerIndex;
+
+		TWeakObjectPtr<AHitCounter>* AssignedGoalPtr = PlayerGoals.Find(PlayerPtr);
+		if (AssignedGoalPtr && AssignedGoalPtr->IsValid())
+		{
+			AssignedGoalPtr->Get()->SetGoalOwner(Player, Color);
+			continue;
+		}
+
 		AHitCounter* BestGoal = nullptr;
 		float MinDistanceSq = TNumericLimits<float>::Max();
-		int32 BestGoalIdx = INDEX_NONE;
-
-		for (int32 GoalIdx = 0; GoalIdx < AvailableGoals.Num(); ++GoalIdx)
+		for (const TWeakObjectPtr<AHitCounter>& GoalPtr : RegisteredGoals)
 		{
-			AHitCounter* Goal = AvailableGoals[GoalIdx];
-			if (IsValid(Goal))
+			AHitCounter* Goal = GoalPtr.Get();
+			if (!IsValid(Goal))
 			{
-				const float DistSq = FVector::DistSquared(Player->GetActorLocation(), Goal->GetActorLocation());
-				if (DistSq < MinDistanceSq)
+				continue;
+			}
+
+			bool bAlreadyAssigned = false;
+			for (const TPair<TWeakObjectPtr<ATP_TestCharacter>, TWeakObjectPtr<AHitCounter>>& Pair : PlayerGoals)
+			{
+				if (Pair.Value == GoalPtr)
 				{
-					MinDistanceSq = DistSq;
-					BestGoal = Goal;
-					BestGoalIdx = GoalIdx;
+					bAlreadyAssigned = true;
+					break;
 				}
+			}
+
+			if (bAlreadyAssigned)
+			{
+				continue;
+			}
+
+			const float DistanceSq = FVector::DistSquared(Player->GetActorLocation(), Goal->GetActorLocation());
+			if (DistanceSq < MinDistanceSq)
+			{
+				MinDistanceSq = DistanceSq;
+				BestGoal = Goal;
 			}
 		}
 
 		if (IsValid(BestGoal))
 		{
+			PlayerGoals.Add(PlayerPtr, BestGoal);
 			BestGoal->SetGoalOwner(Player, Color);
-			AvailableGoals.RemoveAt(BestGoalIdx);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("SoccerSubsystem: Nessuna porta libera disponibile per %s."), *Player->GetName());
+			if (GEngine)
+			{
+				GEngine->AddOnScreenDebugMessage(
+					-1,
+					4.0f,
+					FColor::Yellow,
+					FString::Printf(TEXT("Nessuna porta libera per %s."), *Player->GetName()));
+			}
 		}
 	}
 }

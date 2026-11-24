@@ -26,6 +26,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Soccer|Setup")
 	void InitializeMatch();
 
+	void RegisterPlayer(ATP_TestCharacter* Player);
+	void UnregisterPlayer(ATP_TestCharacter* Player);
+	void RegisterGoal(AHitCounter* Goal);
+	void UnregisterGoal(AHitCounter* Goal);
+
+	UFUNCTION(BlueprintPure, Category = "Soccer|Team")
+	AHitCounter* GetGoalForPlayer(ATP_TestCharacter* Player) const;
+
 	// Configura l'Actor segnaposto da cui ricavare il transform di spawn
 	UFUNCTION(BlueprintCallable, Category = "Soccer|Spawn")
 	void SetBallSpawnPointActor(AActor* SpawnActor);
@@ -71,6 +79,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Soccer|Spawn")
 	float RespawnDelay = 2.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Soccer|Team")
+	TArray<FLinearColor> TeamColors = {
+		FLinearColor(0.05f, 0.25f, 1.0f, 1.0f),
+		FLinearColor(1.0f, 0.05f, 0.05f, 1.0f)
+	};
+
 	UPROPERTY(BlueprintReadWrite, Category = "Soccer|Spawn")
 	TWeakObjectPtr<AActor> BallSpawnPointActor;
 
@@ -82,5 +96,11 @@ protected:
 	int32 TotalGoalsCount = 0;
 
 private:
+	void TryAssignGoals();
+
+	TArray<TWeakObjectPtr<ATP_TestCharacter>> RegisteredPlayers;
+	TArray<TWeakObjectPtr<AHitCounter>> RegisteredGoals;
+	TMap<TWeakObjectPtr<ATP_TestCharacter>, TWeakObjectPtr<AHitCounter>> PlayerGoals;
+
 	FTimerHandle RespawnTimerHandle;
 };

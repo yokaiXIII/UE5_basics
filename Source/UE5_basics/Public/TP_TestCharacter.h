@@ -74,6 +74,7 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void NotifyControllerChanged() override;
 	virtual bool CanJumpInternal_Implementation() const override;
 
@@ -168,6 +169,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Soccer|Team")
 	void SetTeamColor(const FLinearColor& TeamColor);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Soccer|Team")
+	TArray<FName> TeamColorParameterNames = { TEXT("BodyColor"), TEXT("Color"), TEXT("BaseColor"), TEXT("Tint") };
 
 	UFUNCTION(BlueprintPure, Category = "Score")
 	int32 GetScore() const;

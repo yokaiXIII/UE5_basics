@@ -41,12 +41,16 @@ public:
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Soccer|Team")
 	ATP_TestCharacter* GoalOwner = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Soccer|Team")
+	TArray<FName> TeamColorParameterNames = { TEXT("BodyColor"), TEXT("Color"), TEXT("BaseColor"), TEXT("Tint") };
 	
 	int HitCount = 0;	
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:	
 	// Called every frame

@@ -6,6 +6,7 @@
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "Materials/MaterialInterface.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
 
@@ -31,6 +32,26 @@ void AHitCounter::BeginPlay()
 	Super::BeginPlay();
 
 	OnActorHit.AddDynamic(this, &AHitCounter::HandleActorHit);
+	if (UWorld* World = GetWorld())
+	{
+		if (USoccerSubsystem* SoccerSubsystem = World->GetSubsystem<USoccerSubsystem>())
+		{
+			SoccerSubsystem->RegisterGoal(this);
+		}
+	}
+}
+
+void AHitCounter::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	if (UWorld* World = GetWorld())
+	{
+		if (USoccerSubsystem* SoccerSubsystem = World->GetSubsystem<USoccerSubsystem>())
+		{
+			SoccerSubsystem->UnregisterGoal(this);
+		}
+	}
+
+	Super::EndPlay(EndPlayReason);
 }
 
 void AHitCounter::Tick(float DeltaTime)
@@ -56,12 +77,36 @@ void AHitCounter::SetGoalOwner(ATP_TestCharacter* InOwner, const FLinearColor& T
 		const int32 NumMaterials = GoalMesh->GetNumMaterials();
 		for (int32 MatIdx = 0; MatIdx < NumMaterials; ++MatIdx)
 		{
-			UMaterialInstanceDynamic* DynMaterial = GoalMesh->CreateAndSetMaterialInstanceDynamic(MatIdx);
+			UMaterialInstanceDynamic* DynMaterial = Cast<UMaterialInstanceDynamic>(GoalMesh->GetMaterial(MatIdx));
+			if (!IsValid(DynMaterial))
+			{
+				DynMaterial = GoalMesh->CreateAndSetMaterialInstanceDynamic(MatIdx);
+			}
+
 			if (IsValid(DynMaterial))
 			{
-				DynMaterial->SetVectorParameterValue(TEXT("Color"), TeamColor);
-				DynMaterial->SetVectorParameterValue(TEXT("BaseColor"), TeamColor);
-				DynMaterial->SetVectorParameterValue(TEXT("Tint"), TeamColor);
+				TArray<FMaterialParameterInfo> VectorParameterInfos;
+				TArray<FGuid> VectorParameterIds;
+				DynMaterial->GetAllVectorParameterInfo(VectorParameterInfos, VectorParameterIds);
+
+				bool bFoundColorParameter = false;
+				for (const FName& ParameterName : TeamColorParameterNames)
+				{
+					const bool bParameterExists = VectorParameterInfos.ContainsByPredicate([&ParameterName](const FMaterialParameterInfo& ParameterInfo)
+					{
+						return ParameterInfo.Name == ParameterName;
+					});
+					if (bParameterExists)
+					{
+						DynMaterial->SetVectorParameterValue(ParameterName, TeamColor);
+						bFoundColorParameter = true;
+					}
+				}
+
+				if (!bFoundColorParameter)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("%s: nessun parametro colore vettoriale trovato sul materiale della porta %d."), *GetName(), MatIdx);
+				}
 			}
 		}
 	}
