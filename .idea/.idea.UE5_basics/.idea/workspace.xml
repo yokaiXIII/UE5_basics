@@ -16,14 +16,8 @@
   <component name="ChangeListManager">
     <list default="true" id="aeaeb703-cd09-4f17-afcf-45ecd4c3d1b9" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.UE5_basics/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.UE5_basics/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Lesson-3/BB_Enemy.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Lesson-3/BB_Enemy.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Lesson-3/BP_AIControllerEnemy.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Lesson-3/BP_AIControllerEnemy.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Lesson-3/BP_Enemy.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Lesson-3/BP_Enemy.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Lesson-3/BT_Enemy.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Lesson-3/BT_Enemy.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/ThirdPerson/Maps/ThirdPersonMap.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/ThirdPerson/Maps/ThirdPersonMap.umap" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/__ExternalActors__/ThirdPerson/Maps/ThirdPersonMap/5/X9/X734ALQSVWD98GB37QVZ8C.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/__ExternalActors__/ThirdPerson/Maps/ThirdPersonMap/5/ZR/OR4FL18OVOFCFVPTDLX9P5.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/__ExternalActors__/ThirdPerson/Maps/ThirdPersonMap/5/ZR/OR4FL18OVOFCFVPTDLX9P5.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/UE5_basics/TP_Character/PlayerCharacter.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/UE5_basics/TP_Character/PlayerCharacter.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Lesson-3/BTTask_GetNearestCover.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Lesson-3/BTTask_GetNearestCover.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Lesson-3/BT_LongRangeEnemy.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Lesson-3/BT_LongRangeEnemy.uasset" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -37,7 +31,6 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="cidr-memory-view://5" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://D:/Epic Games/UE_5.7/Engine/Source/Runtime/Core/Public/Delegates/DelegateSignatureImpl.inl" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://D:/Epic Games/UE_5.7/Engine/Source/Runtime/CoreUObject/Public/UObject/Object.h" root0="FORCE_HIGHLIGHTING" />
   </component>
@@ -56,23 +49,23 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_ADD_EXTERNAL_FILES": "true",
-    "C/C++ Project.UE5_basics.executor": "Debug",
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "WebServerToolWindowFactoryState": "false",
-    "git-widget-placeholder": "lorenzo/main",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
+    &quot;C/C++ Project.UE5_basics.executor&quot;: &quot;Debug&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;lorenzo/main&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunAnythingCache">
     <option name="myCommands">
       <command value="aim" />
@@ -352,6 +345,7 @@
       <workItem from="1793781253403" duration="6595000" />
       <workItem from="1794386157083" duration="4001000" />
       <workItem from="1795003662989" duration="539000" />
+      <workItem from="1795515032917" duration="2977000" />
     </task>
     <servers />
   </component>
