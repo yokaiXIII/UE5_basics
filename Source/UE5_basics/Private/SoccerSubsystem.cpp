@@ -240,28 +240,40 @@ void USoccerSubsystem::RegisterGoalFromBall(ATagBall* Ball, AHitCounter* GoalHit
 
 	ATP_TestCharacter* Thrower = Ball->GetLastThrower();
 	ATP_TestCharacter* GoalDefender = IsValid(GoalHit) ? GoalHit->GetGoalOwner() : nullptr;
-
-	ATP_TestCharacter* AwardedPlayer = Thrower;
-
-	// Logica di attribuzione:
-	// Se chi tira segna nella propria porta (Thrower == GoalDefender), il punto va all'avversario
-	if (IsValid(Thrower) && IsValid(GoalDefender) && Thrower == GoalDefender)
+	if (!IsValid(Thrower) || !IsValid(GoalDefender))
 	{
-		for (const auto& Pair : PlayerScores)
-		{
-			if (Pair.Key != Thrower)
-			{
-				AwardedPlayer = Pair.Key;
-				break;
-			}
-		}
+		return;
+	}
+
+	ATP_TestCharacter* AwardedPlayer = Thrower == GoalDefender ? FindOpponent(Thrower) : Thrower;
+	if (!IsValid(AwardedPlayer))
+	{
+		return;
 	}
 
 	RegisterPlayerGoal(AwardedPlayer, Points);
+	if (AHitCounter* AwardedPlayerGoal = GetGoalForPlayer(AwardedPlayer))
+	{
+		AwardedPlayerGoal->AddScore(Points);
+	}
 
 	// Distrugge la palla attuale e pianifica il respawn
 	Ball->Explode();
 	ScheduleBallRespawn();
+}
+
+ATP_TestCharacter* USoccerSubsystem::FindOpponent(ATP_TestCharacter* Player) const
+{
+	for (const TWeakObjectPtr<ATP_TestCharacter>& PlayerPtr : RegisteredPlayers)
+	{
+		ATP_TestCharacter* Candidate = PlayerPtr.Get();
+		if (IsValid(Candidate) && Candidate != Player)
+		{
+			return Candidate;
+		}
+	}
+
+	return nullptr;
 }
 
 void USoccerSubsystem::RegisterPlayerGoal(ATP_TestCharacter* Scorer, int32 Points)

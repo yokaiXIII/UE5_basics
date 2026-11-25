@@ -4,6 +4,7 @@
 #include "SoccerSubsystem.h"
 #include "TP_TestCharacter.h"
 #include "Components/BoxComponent.h"
+#include "Components/MeshComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Materials/MaterialInterface.h"
@@ -72,15 +73,22 @@ void AHitCounter::SetGoalOwner(ATP_TestCharacter* InOwner, const FLinearColor& T
 {
 	GoalOwner = InOwner;
 
-	if (IsValid(GoalMesh))
+	TArray<UMeshComponent*> MeshComponents;
+	GetComponents<UMeshComponent>(MeshComponents);
+	for (UMeshComponent* MeshComponent : MeshComponents)
 	{
-		const int32 NumMaterials = GoalMesh->GetNumMaterials();
+		if (!IsValid(MeshComponent))
+		{
+			continue;
+		}
+
+		const int32 NumMaterials = MeshComponent->GetNumMaterials();
 		for (int32 MatIdx = 0; MatIdx < NumMaterials; ++MatIdx)
 		{
-			UMaterialInstanceDynamic* DynMaterial = Cast<UMaterialInstanceDynamic>(GoalMesh->GetMaterial(MatIdx));
+			UMaterialInstanceDynamic* DynMaterial = Cast<UMaterialInstanceDynamic>(MeshComponent->GetMaterial(MatIdx));
 			if (!IsValid(DynMaterial))
 			{
-				DynMaterial = GoalMesh->CreateAndSetMaterialInstanceDynamic(MatIdx);
+				DynMaterial = MeshComponent->CreateAndSetMaterialInstanceDynamic(MatIdx);
 			}
 
 			if (IsValid(DynMaterial))
@@ -105,7 +113,7 @@ void AHitCounter::SetGoalOwner(ATP_TestCharacter* InOwner, const FLinearColor& T
 
 				if (!bFoundColorParameter)
 				{
-					UE_LOG(LogTemp, Warning, TEXT("%s: nessun parametro colore vettoriale trovato sul materiale della porta %d."), *GetName(), MatIdx);
+					UE_LOG(LogTemp, Warning, TEXT("%s: nessun parametro colore vettoriale trovato sul materiale %d del componente %s."), *GetName(), MatIdx, *MeshComponent->GetName());
 				}
 			}
 		}
@@ -119,15 +127,18 @@ void AHitCounter::RegisterBallHit(ATagBall* Ball)
 		return;
 	}
 
-	++HitCount;
-
 	if (UWorld* World = GetWorld())
 	{
 		if (USoccerSubsystem* SoccerSubsystem = World->GetSubsystem<USoccerSubsystem>())
 		{
-			SoccerSubsystem->RegisterGoalFromBall(Ball, this, 1);
+			SoccerSubsystem->RegisterGoalFromBall(Ball, this);
 		}
 	}
+}
+
+void AHitCounter::AddScore(int32 Points)
+{
+	HitCount += Points;
 
 	if (GEngine)
 	{

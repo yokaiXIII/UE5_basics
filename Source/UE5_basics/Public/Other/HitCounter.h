@@ -25,6 +25,10 @@ public:
 						FVector NormalImpulse, const FHitResult& Hit);
 
 	void RegisterBallHit(ATagBall* Ball);
+	void AddScore(int32 Points);
+
+	UFUNCTION(BlueprintPure, Category = "Soccer|Score")
+	int32 GetHitCount() const { return HitCount; }
 
 	// Imposta il player difensore e il colore associato
 	UFUNCTION(BlueprintCallable, Category = "Soccer|Team")
@@ -45,7 +49,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Soccer|Team")
 	TArray<FName> TeamColorParameterNames = { TEXT("BodyColor"), TEXT("Color"), TEXT("BaseColor"), TEXT("Tint") };
 	
-	int HitCount = 0;	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Soccer|Score")
+	int32 HitCount = 0;
 
 protected:
 	// Called when the game starts or when spawned

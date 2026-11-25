@@ -97,6 +97,7 @@ protected:
 
 private:
 	void TryAssignGoals();
+	ATP_TestCharacter* FindOpponent(ATP_TestCharacter* Player) const;
 
 	TArray<TWeakObjectPtr<ATP_TestCharacter>> RegisteredPlayers;
 	TArray<TWeakObjectPtr<AHitCounter>> RegisteredGoals;
