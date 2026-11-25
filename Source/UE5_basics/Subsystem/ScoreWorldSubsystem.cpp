@@ -44,7 +44,16 @@ void UScoreWorldSubsystem::Deinitialize()
 //Adding score to player 
 void UScoreWorldSubsystem::AddScore(APlayerCharacter* ScorerActor, int amount)
 {
+	if (!IsValid(ScorerActor)) return;
+	FString TeamString = ScorerActor->GetPlayerTeam();
 
+	for (auto team : Teams)
+	{
+		if (team.TeamName == TeamString)
+		{
+			team.Score += amount;
+		}
+	}
 }
 //assign player to a team
 void UScoreWorldSubsystem::RegisterNewPlayer(APlayerCharacter* Player)

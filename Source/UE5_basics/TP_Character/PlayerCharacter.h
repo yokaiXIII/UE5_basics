@@ -11,6 +11,7 @@
 #include "UE5_basics/Public/HitComponent.h"
 #include "PlayerCharacter.generated.h"
 
+struct FTeam;
 class UInputMappingContext;
 class UInputAction;
 class UEnhancedInputComponent;
@@ -143,6 +144,7 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category="Teams")
 	void SetPlayerTeam(FTeam TeamName);
+	FString GetPlayerTeam();
 
 private:
 	UFUNCTION()

@@ -348,3 +348,8 @@ void APlayerCharacter::SetPlayerTeam(FTeam NewTeam)
 	
 }
 
+FString APlayerCharacter::GetPlayerTeam()
+{
+	return TeamName;
+}
+
