@@ -23,14 +23,11 @@ public:
 	UPROPERTY(EditAnywhere , BlueprintReadWrite)
 	USphereComponent* Collider;
 
+	UPROPERTY(VisibleAnywhere , Blueprintable, BlueprintReadOnly)
+	APlayerCharacter* Holder; // The player who threw and posses this ball
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
-private:
-	
-	UPROPERTY(VisibleAnywhere , Blueprintable)
-	APlayerCharacter* Holder; // The player who threw and posses this ball
 	
 public:	
 	// Called every frame
