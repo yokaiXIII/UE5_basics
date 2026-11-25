@@ -3,9 +3,25 @@
 
 #include "ScoreWorldSubsystem.h"
 
+#include <UE5_basics/TP_Character/PlayerCharacter.h>
+
 void UScoreWorldSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
+	TeamsCounter = 0;
+	FTeam* Team1 = new FTeam();
+	Team1->Score = 0;
+	Team1->TeamName = "Team1";
+	Team1->TeamColor = FLinearColor::Blue;
+	
+	FTeam* Team2 = new FTeam();
+	Team1->Score = 0;
+	Team1->TeamName = "Team2";
+	Team1->TeamColor = FLinearColor::Red;
+	
+	Teams.Add(*Team1);
+	Teams.Add(*Team2);
+	/*
 	const UEnum* Enum = StaticEnum<ETeam>();
 	for (int32 i = 0; i < Enum->NumEnums() - 1; ++i)
 	{
@@ -15,7 +31,7 @@ void UScoreWorldSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 		ETeam Type = static_cast<ETeam>(Enum->GetValueByIndex(i));
 		scoreMap.Add(Type, currentScore);
 	}
-		
+	*/	
 	
 	// insert inizialize logic
 }
@@ -26,8 +42,18 @@ void UScoreWorldSubsystem::Deinitialize()
 	Super::Deinitialize();
 }
 //Adding score to player 
-void UScoreWorldSubsystem::AddScore(AActor* ScorerActor, int amount)
+void UScoreWorldSubsystem::AddScore(APlayerCharacter* ScorerActor, int amount)
 {
+
+}
+//assign player to a team
+void UScoreWorldSubsystem::RegisterNewPlayer(APlayerCharacter* Player)
+{
+	if (!IsValid(Player))
+		return;
+	if (TeamsCounter > Teams.Num())
+		TeamsCounter = 0;
+	Player->SetPlayerTeam(Teams[TeamsCounter].TeamName);
+	TeamsCounter++;
 	
 }
-
