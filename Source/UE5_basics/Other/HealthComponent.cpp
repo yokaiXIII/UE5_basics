@@ -2,10 +2,13 @@
 
 
 #include "HealthComponent.h"
+#include "UE5_basics/TP_Character/PlayerCharacter.h"
 #include "TimerManager.h"
 
 UHealthComponent::UHealthComponent() {
 	PrimaryComponentTick.bCanEverTick = true;
+
+	
 }
 
 
@@ -31,6 +34,16 @@ void UHealthComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	AutoRecoveryHealth(DeltaTime);
 	CheckDamageTime(DeltaTime);
 }
+
+void UHealthComponent::GetDamageFromPlayer(APlayerCharacter* Player)
+{
+	if (!IsValid(Player))
+		return;
+
+	int damage = Player->StaminaDamage;
+	GetDamage(damage);
+}
+
 
 
 void UHealthComponent::GetDamage(float Amount) {
