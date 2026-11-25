@@ -63,6 +63,8 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category="Score System")
 	TArray<FTeam> Teams;
 	
+	UFUNCTION(BlueprintCallable)
+	TArray<FTeam> GetAllTeams();
 	//UPROPERTY(VisibleAnywhere, BlueprintCallable)
     //	TMap<ETeam, int32> scoreMap;
     	

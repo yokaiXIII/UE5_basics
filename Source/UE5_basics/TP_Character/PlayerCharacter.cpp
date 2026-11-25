@@ -12,6 +12,7 @@
 #include "UE5_basics/Enemy/Enemy.h"
 #include "UE5_basics/Public/HitComponent.h"
 #include "UE5_basics/Public/Ball.h"
+#include "UE5_basics/Subsystem/ScoreWorldSubsystem.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -336,8 +337,14 @@ void APlayerCharacter::NotifyControllerChanged()
 	}
 }
 
-void APlayerCharacter::SetPlayerTeam(FString NewTeamName)
+void APlayerCharacter::SetPlayerTeam(FTeam NewTeam)
 {
+	TeamName = NewTeam.TeamName;
+	UStaticMeshComponent* MeshComp = FindComponentByClass<UStaticMeshComponent>();
+	if (!MeshComp)
+		return;
+	UMaterialInstanceDynamic* DynamicMesh = MeshComp->CreateDynamicMaterialInstance(0);
+	DynamicMesh->SetVectorParameterValue(FName("BaseColor"),NewTeam.TeamColor);
 	
 }
 

@@ -142,7 +142,7 @@ public:
 	virtual void DoJumpEnd();
 	
 	UFUNCTION(BlueprintCallable, Category="Teams")
-	void SetPlayerTeam(FString TeamName);
+	void SetPlayerTeam(FTeam TeamName);
 
 private:
 	UFUNCTION()
