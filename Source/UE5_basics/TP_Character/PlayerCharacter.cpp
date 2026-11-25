@@ -283,17 +283,19 @@ void APlayerCharacter::PickupBall(ABall* Ball)
 {
 	if(!IsValid(Ball))
 		return;
+	
+	if (!Ball->RetrivedBy(this))   // la palla ha rifiutato: niente attach
+		return;
+	
 	BallRetrived = Ball;
-	BallRetrived->SetBallHolder(this);
 	
 
 	FAttachmentTransformRules Rules(
 			EAttachmentRule::SnapToTarget,   // Location
 			EAttachmentRule::SnapToTarget,   // Rotation
 			EAttachmentRule::KeepRelative,   // Scale
-			true                             // Weld simulated bodies
+			false                            // Weld simulated bodies
 		);
-	BallRetrived->ToggleCollision(false);
 	BallRetrived->AttachToComponent(GetMesh() , Rules , FName(SocketName));
 }
 
@@ -304,9 +306,6 @@ void APlayerCharacter::Throw()
 	{
 
 		BallRetrived->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-
-
-		
 		BallRetrived->Released(FollowCamera->GetForwardVector());
 
 		BallRetrived = nullptr;
