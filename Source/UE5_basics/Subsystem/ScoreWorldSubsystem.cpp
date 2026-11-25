@@ -15,9 +15,9 @@ void UScoreWorldSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	Team1->TeamColor = FLinearColor::Blue;
 	
 	FTeam* Team2 = new FTeam();
-	Team1->Score = 0;
-	Team1->TeamName = "Team2";
-	Team1->TeamColor = FLinearColor::Red;
+	Team2->Score = 0;
+	Team2->TeamName = "Team2";
+	Team2->TeamColor = FLinearColor::Red;
 	
 	Teams.Add(*Team1);
 	Teams.Add(*Team2);
@@ -51,9 +51,15 @@ void UScoreWorldSubsystem::RegisterNewPlayer(APlayerCharacter* Player)
 {
 	if (!IsValid(Player))
 		return;
-	if (TeamsCounter > Teams.Num())
+	if (TeamsCounter > Teams.Num() - 1)
 		TeamsCounter = 0;
-	Player->SetPlayerTeam(Teams[TeamsCounter].TeamName);
+	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, "TeamCounter = " + (TeamsCounter));
+
+	Player->SetPlayerTeam(Teams[TeamsCounter]);
 	TeamsCounter++;
-	
+}
+
+TArray<FTeam> UScoreWorldSubsystem::GetAllTeams()
+{
+	return Teams;	
 }
