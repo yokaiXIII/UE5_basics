@@ -23,6 +23,7 @@ class UE5_BASICS_API APlayerCharacter : public ACharacter
 	GENERATED_BODY()
 
 public:
+	
 	// Sets default values for this character's properties
 	APlayerCharacter();
 
@@ -55,6 +56,7 @@ public:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	ABall* BallRetrived;
+	
 	
 protected:
 	// Called when the game starts or when spawned
@@ -138,6 +140,9 @@ public:
 	/** Handles jump pressed inputs from either controls or UI interfaces */
 	UFUNCTION(BlueprintCallable, Category="Input")
 	virtual void DoJumpEnd();
+	
+	UFUNCTION(BlueprintCallable, Category="Teams")
+	void SetPlayerTeam(FString TeamName);
 
 private:
 	UFUNCTION()
@@ -148,4 +153,7 @@ private:
 
 	UFUNCTION()
 	void Throw();
+	
+	UPROPERTY(VisibleAnywhere)
+	FString TeamName;
 };

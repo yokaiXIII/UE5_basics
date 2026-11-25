@@ -11,7 +11,8 @@
  */
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnScoreChanged, int32, NewScore);
 
-UENUM(BlueprintType)
+/*
+ UENUM(BlueprintType)
 enum class ETeam : uint8
 {
 	Team1,
@@ -21,7 +22,22 @@ enum class ETeam : uint8
 	
 	MAX      UMETA(Hidden)   // optional sentinel, hidden in the editor
 };
+*/
+USTRUCT(BlueprintType)
+struct FTeam
+{
+	GENERATED_USTRUCT_BODY()
 
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString TeamName;
+		
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int Score;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FLinearColor TeamColor;
+};
 UCLASS()
 class UE5_BASICS_API UScoreWorldSubsystem : public UWorldSubsystem
 {
@@ -33,18 +49,27 @@ public:
 	virtual void Deinitialize() override;
 	
 	UFUNCTION(BlueprintCallable, Category="Score System")
-	void AddScore(AActor* ScorerActor, int amount);
+	void AddScore(APlayerCharacter* ScorerActor, int amount);
 	
 	UFUNCTION(BlueprintCallable, Category="Score System")
 	int GetScore() const{ return currentScore; };
 	
+	UFUNCTION(BlueprintCallable, Category="Score System")
+	void RegisterNewPlayer(APlayerCharacter* Player);
+	
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category="Score System")
 	FOnScoreChanged OnScoreChanged;
 	
+	UPROPERTY(BlueprintReadOnly, Category="Score System")
+	TArray<FTeam> Teams;
+	
+	//UPROPERTY(VisibleAnywhere, BlueprintCallable)
+    //	TMap<ETeam, int32> scoreMap;
+    	
 private:
-	UPROPERTY()
-	TMap<ETeam, int32> scoreMap;
 	
 	UPROPERTY()
 	int currentScore = 0; 
+	
+	int TeamsCounter = 0;
 };

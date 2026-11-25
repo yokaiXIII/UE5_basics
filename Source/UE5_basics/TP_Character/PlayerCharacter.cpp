@@ -337,3 +337,8 @@ void APlayerCharacter::NotifyControllerChanged()
 	}
 }
 
+void APlayerCharacter::SetPlayerTeam(FString NewTeamName)
+{
+	
+}
+
