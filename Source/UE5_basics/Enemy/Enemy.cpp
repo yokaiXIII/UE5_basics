@@ -71,6 +71,8 @@ void AEnemy::FireWithSphereSweep() {
 
 	if (bHit) {
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), WeaponSlot.HitEFX, Hit.ImpactPoint);
+		//draw debug ray
+		DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 4.0f, 0, 2.0f);
 		ATP_Character* HitPlayer = Cast<ATP_Character>(Hit.GetActor()); // Maybe here is broken due to new engine version
 
 		if (HitPlayer) {
@@ -78,7 +80,7 @@ void AEnemy::FireWithSphereSweep() {
 			HitPlayer->GetHealthComponent()->GetDamage(WeaponSlot.Damage);
 		} else {
 			GEngine->AddOnScreenDebugMessage(-1, 4.0f, FColor::Green, TEXT("Hit! " + Hit.GetActor()->GetName()));
-		}		
+		}
 	}
 }
 
