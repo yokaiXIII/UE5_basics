@@ -31,6 +31,9 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Ball")
 	APlayerCharacter* GetHolder() const { return Holder; }
+	
+	float DamageFrequency = 1.0f;
+	float DamageAmount = 10.0f;
 
 protected:
 	// Called when the game starts or when spawned
