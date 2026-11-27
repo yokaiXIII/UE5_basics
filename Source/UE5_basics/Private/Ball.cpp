@@ -237,6 +237,7 @@ void ABall::ColliderHolderTimerCallback()
 bool ABall::CanBePickedUpBy(const APlayerCharacter* Player) const
 {
 	if (!IsValid(Player)) return false;
+	if (Player->IsStun) return false;
 	if (bIsBeingReleased) return false;                       // in pieno lancio
 	if (GetAttachParentActor() != nullptr) return false;      // già in mano a qualcuno
 	if (Player == Holder && GetWorldTimerManager().IsTimerActive(ColliderHolderResetHandle))

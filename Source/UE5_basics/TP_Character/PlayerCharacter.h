@@ -102,10 +102,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	UInputAction* AttackAction;
 	
-	
-	// Stun
-	bool IsStun = false;
-	
 	UFUNCTION()
 	void HandleHealthToZero();
 	
@@ -126,6 +122,9 @@ public:
 
 	void AimIn();
 	void AimOut();
+	
+	// Stun
+    	bool IsStun = false;
 
 	
 	// Called to bind functionality to input
