@@ -87,6 +87,8 @@ void APlayerCharacter::BeginPlay()
 	{
 		mesh->OnComponentHit.AddDynamic(this, &APlayerCharacter::OnComponentHit);
 	}
+
+	PlayerMaterialInstance = UMaterialInstanceDynamic::Create(GetMesh()->GetMaterial(0) , 0);
 }
 
 
@@ -340,12 +342,17 @@ void APlayerCharacter::NotifyControllerChanged()
 void APlayerCharacter::SetPlayerTeam(FTeam NewTeam)
 {
 	TeamName = NewTeam.TeamName;
-	UStaticMeshComponent* MeshComp = FindComponentByClass<UStaticMeshComponent>();
-	if (!MeshComp)
-		return;
-	UMaterialInstanceDynamic* DynamicMesh = MeshComp->CreateDynamicMaterialInstance(0);
-	DynamicMesh->SetVectorParameterValue(FName("BaseColor"),NewTeam.TeamColor);
+	if (!IsValid(PlayerMaterialInstance))
+	{
+		PlayerMaterialInstance = UMaterialInstanceDynamic::Create(GetMesh()->GetMaterial(0) , 0);
+	}
 	
+	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Green,  NewTeam.TeamColor.ToString());
+
+	PlayerMaterialInstance->SetVectorParameterValue("BodyColor" , NewTeam.TeamColor);
+
+	GetMesh()->SetMaterial(0 , PlayerMaterialInstance);
+
 }
 
 FString APlayerCharacter::GetPlayerTeam()

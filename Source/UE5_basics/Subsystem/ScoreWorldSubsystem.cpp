@@ -12,7 +12,8 @@ void UScoreWorldSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	FTeam* Team1 = new FTeam();
 	Team1->Score = 0;
 	Team1->TeamName = "Team1";
-	Team1->TeamColor = FLinearColor::Blue;
+	Team1->TeamColor = FLinearColor::Yellow;
+	
 	
 	FTeam* Team2 = new FTeam();
 	Team2->Score = 0;
@@ -56,7 +57,7 @@ void UScoreWorldSubsystem::AddScore(APlayerCharacter* ScorerActor, int amount)
 	}
 }
 //assign player to a team
-void UScoreWorldSubsystem::RegisterNewPlayer(APlayerCharacter* Player)
+void UScoreWorldSubsystem::RegisterNewPlayer(APlayerCharacter* Player, FTeam& assignedTeam)
 {
 	if (!IsValid(Player))
 		return;
@@ -64,7 +65,8 @@ void UScoreWorldSubsystem::RegisterNewPlayer(APlayerCharacter* Player)
 		TeamsCounter = 0;
 	GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, "TeamCounter = " + (TeamsCounter));
 
-	Player->SetPlayerTeam(Teams[TeamsCounter]);
+	assignedTeam = Teams[TeamsCounter];
+	Player->SetPlayerTeam(assignedTeam);
 	TeamsCounter++;
 }
 

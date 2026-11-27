@@ -158,4 +158,7 @@ private:
 	
 	UPROPERTY(VisibleAnywhere)
 	FString TeamName;
+
+	UPROPERTY()
+	UMaterialInstanceDynamic* PlayerMaterialInstance;
 };

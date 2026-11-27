@@ -55,18 +55,20 @@ public:
 	int GetScore() const{ return currentScore; };
 	
 	UFUNCTION(BlueprintCallable, Category="Score System")
-	void RegisterNewPlayer(APlayerCharacter* Player);
+	void RegisterNewPlayer(APlayerCharacter* Player, FTeam& assignedTeam);
 	
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category="Score System")
 	FOnScoreChanged OnScoreChanged;
 	
 	UPROPERTY(BlueprintReadOnly, Category="Score System")
 	TArray<FTeam> Teams;
+
 	
 	UFUNCTION(BlueprintCallable)
 	TArray<FTeam> GetAllTeams();
 	//UPROPERTY(VisibleAnywhere, BlueprintCallable)
     //	TMap<ETeam, int32> scoreMap;
+
     	
 private:
 	
