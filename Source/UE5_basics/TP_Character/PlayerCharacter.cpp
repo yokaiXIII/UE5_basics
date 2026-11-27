@@ -12,6 +12,7 @@
 #include "UE5_basics/Enemy/Enemy.h"
 #include "UE5_basics/Public/HitComponent.h"
 #include "UE5_basics/Public/Ball.h"
+#include "UE5_basics/Subsystem/ScoreWorldSubsystem.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -279,11 +280,38 @@ void APlayerCharacter::HandleHit(AActor* hitter)
 }
 
 
+void APlayerCharacter::PickupBall(ABall* Ball)
+{
+	if(!IsValid(Ball))
+		return;
+	
+	if (!Ball->RetrivedBy(this))   // la palla ha rifiutato: niente attach
+		return;
+	
+	BallRetrived = Ball;
+	
+
+	FAttachmentTransformRules Rules(
+			EAttachmentRule::SnapToTarget,   // Location
+			EAttachmentRule::SnapToTarget,   // Rotation
+			EAttachmentRule::KeepRelative,   // Scale
+			false                            // Weld simulated bodies
+		);
+	BallRetrived->AttachToComponent(GetMesh() , Rules , FName(SocketName));
+}
+
+
 void APlayerCharacter::Throw()
 {
 	if (IsValid(BallRetrived) && BallRetrived != nullptr)
 	{
+
+		BallRetrived->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 		BallRetrived->Released(FollowCamera->GetForwardVector());
+
+		BallRetrived = nullptr;
+		
+		
 		return;
 	}
 }
@@ -307,5 +335,21 @@ void APlayerCharacter::NotifyControllerChanged()
 			GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Green, "IMC aggiunto");
 		}
 	}
+}
+
+void APlayerCharacter::SetPlayerTeam(FTeam NewTeam)
+{
+	TeamName = NewTeam.TeamName;
+	UStaticMeshComponent* MeshComp = FindComponentByClass<UStaticMeshComponent>();
+	if (!MeshComp)
+		return;
+	UMaterialInstanceDynamic* DynamicMesh = MeshComp->CreateDynamicMaterialInstance(0);
+	DynamicMesh->SetVectorParameterValue(FName("BaseColor"),NewTeam.TeamColor);
+	
+}
+
+FString APlayerCharacter::GetPlayerTeam()
+{
+	return TeamName;
 }
 

@@ -11,6 +11,7 @@
 #include "UE5_basics/Public/HitComponent.h"
 #include "PlayerCharacter.generated.h"
 
+struct FTeam;
 class UInputMappingContext;
 class UInputAction;
 class UEnhancedInputComponent;
@@ -23,6 +24,7 @@ class UE5_BASICS_API APlayerCharacter : public ACharacter
 	GENERATED_BODY()
 
 public:
+	
 	// Sets default values for this character's properties
 	APlayerCharacter();
 
@@ -44,7 +46,7 @@ public:
 	int StaminaDamage;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	FString SocketName = "RightHandSocket";
+	FString SocketName = "hand_rSocket";
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UHealthComponent* HealthComponent;
@@ -55,6 +57,7 @@ public:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	ABall* BallRetrived;
+	
 	
 protected:
 	// Called when the game starts or when spawned
@@ -127,6 +130,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void HandleHit(AActor* hitter);
+
+	UFUNCTION(BlueprintCallable)
+	void PickupBall(ABall* Ball);
 	
 	/** Handles move inputs from either controls or UI interfaces */
 	UFUNCTION(BlueprintCallable, Category="Input")
@@ -143,6 +149,10 @@ public:
 	/** Handles jump pressed inputs from either controls or UI interfaces */
 	UFUNCTION(BlueprintCallable, Category="Input")
 	virtual void DoJumpEnd();
+	
+	UFUNCTION(BlueprintCallable, Category="Teams")
+	void SetPlayerTeam(FTeam TeamName);
+	FString GetPlayerTeam();
 
 private:
 	UFUNCTION()
@@ -153,4 +163,7 @@ private:
 
 	UFUNCTION()
 	void Throw();
+	
+	UPROPERTY(VisibleAnywhere)
+	FString TeamName;
 };
