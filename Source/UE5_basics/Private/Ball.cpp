@@ -4,6 +4,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Engine/Engine.h"
 #include "TimerManager.h"
+#include "UE5_basics/Other/HealthComponent.h"
 
 // Sets default values
 ABall::ABall()
@@ -116,7 +117,16 @@ void ABall::SetBallHolder(APlayerCharacter* NewHolder)
 {
 	if (!IsValid(NewHolder))
 		return;
+	if (IsValid(Holder))
+	{
+		auto OldHealthComponent = Holder->HealthComponent;
+		if (IsValid(OldHealthComponent))
+			OldHealthComponent->StopDamageOverTime();
+	}
 	Holder = NewHolder;
+	auto HealthComponent = NewHolder->HealthComponent;
+	if (IsValid(HealthComponent))
+		HealthComponent->TriggerDamageOverTime(DamageFrequency, DamageAmount);
 }
 
 bool ABall::RetrivedBy(APlayerCharacter* perpetrator)
@@ -152,6 +162,10 @@ void ABall::Released(FVector forward, bool resetHolder)
 
 	if (IsValid(Holder))
 	{
+		auto OldHealthComponent = Holder->HealthComponent;
+		if (IsValid(OldHealthComponent))
+			OldHealthComponent->StopDamageOverTime();
+		// setting new position for the ball
 		const float Offset = Holder->GetCapsuleComponent()->GetScaledCapsuleRadius()
 						   + Collider->GetScaledSphereRadius() + 10.f;
 

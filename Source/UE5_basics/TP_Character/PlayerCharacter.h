@@ -120,6 +120,9 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	void SwitchToOneVsOne();
+	void SwitchToFreeForAll();
+
 	UFUNCTION(BlueprintCallable)
 	void HandleHit(AActor* hitter);
 
