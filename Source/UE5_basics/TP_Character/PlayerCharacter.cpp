@@ -94,11 +94,18 @@ void APlayerCharacter::HandleHealthToZero()
 {
 	if (IsStun) return;
 	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Purple, "STUNNED!!!");
+
+	AimOut();
+	StopJumping();
+	GetCharacterMovement()->StopMovementImmediately();
+	
 	IsStun = true;
 	ToggleCommands(false);
 	if (IsValid(BallRetrived) && BallRetrived != nullptr)
 	{
+		BallRetrived->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 		BallRetrived->Released(FollowCamera->GetForwardVector(), true);
+		BallRetrived = nullptr;
 	}
 }
 
@@ -145,7 +152,8 @@ void APlayerCharacter::OnComponentHit(UPrimitiveComponent* Component, AActor* Ot
 {
 	auto castBallActor = Cast<ABall>(OtherActor);
 	if (!IsValid(castBallActor)) return;
-	castBallActor->RetrivedBy(this);
+	PickupBall(castBallActor);
+	//castBallActor->RetrivedBy(this); 
 }
 
 #pragma region "Character Movement Logic"
@@ -174,6 +182,9 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 		//Shooting
 		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Started, this, &APlayerCharacter::Throw);
+
+		//Attack
+		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &APlayerCharacter::Attack);
 	}
 }
 
@@ -314,6 +325,25 @@ void APlayerCharacter::Throw()
 		
 		return;
 	}
+}
+
+void APlayerCharacter::Attack()
+{
+	FVector Start = GetActorLocation();
+	FVector End = Start + GetActorForwardVector() * 150.f;
+
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+
+	FHitResult Hit;
+	if (!GetWorld()->SweepSingleByChannel(Hit, Start, End, FQuat::Identity, ECC_Pawn, FCollisionShape::MakeSphere(50.f), Params))
+		return;
+
+	APlayerCharacter* Victim = Cast<APlayerCharacter>(Hit.GetActor());
+	if (!IsValid(Victim) || Victim->IsStun)
+		return;
+	
+	Victim->HealthComponent->GetDamage(99999.f);
 }
 
 void APlayerCharacter::NotifyControllerChanged()

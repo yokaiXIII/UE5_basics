@@ -98,6 +98,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category="Input")
 	UInputAction* ShootAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	UInputAction* AttackAction;
 	
 	
 	// Stun
@@ -163,6 +166,9 @@ private:
 
 	UFUNCTION()
 	void Throw();
+
+	UFUNCTION()
+	void Attack();
 	
 	UPROPERTY(VisibleAnywhere)
 	FString TeamName;
