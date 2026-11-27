@@ -115,7 +115,7 @@ void APlayerCharacter::HandleHealthToZero()
 	if (IsValid(BallRetrived) && BallRetrived != nullptr)
 	{
 		BallRetrived->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-		BallRetrived->Released(FollowCamera->GetForwardVector(), true);
+		BallRetrived->Released(GetActorForwardVector(), true);
 		BallRetrived = nullptr;
 	}
 }
