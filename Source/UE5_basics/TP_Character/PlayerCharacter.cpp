@@ -87,6 +87,14 @@ void APlayerCharacter::BeginPlay()
 	{
 		mesh->OnComponentHit.AddDynamic(this, &APlayerCharacter::OnComponentHit);
 	}
+
+	if (UWorld* World = GetWorld())
+	{
+		if (UScoreWorldSubsystem* ScoreSub = World->GetSubsystem<UScoreWorldSubsystem>())
+		{
+			ScoreSub->RegisterNewPlayer(this);
+		}
+	}
 }
 
 
@@ -174,6 +182,34 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 		//Shooting
 		EnhancedInputComponent->BindAction(ShootAction, ETriggerEvent::Started, this, &APlayerCharacter::Throw);
+	}
+
+	if (PlayerInputComponent)
+	{
+		PlayerInputComponent->BindKey(EKeys::Five, IE_Pressed, this, &APlayerCharacter::SwitchToOneVsOne);
+		PlayerInputComponent->BindKey(EKeys::Seven, IE_Pressed, this, &APlayerCharacter::SwitchToFreeForAll);
+	}
+}
+
+void APlayerCharacter::SwitchToOneVsOne()
+{
+	if (UWorld* World = GetWorld())
+	{
+		if (UScoreWorldSubsystem* ScoreSub = World->GetSubsystem<UScoreWorldSubsystem>())
+		{
+			ScoreSub->SetMatchMode(EBallMatchMode::OneVsOne);
+		}
+	}
+}
+
+void APlayerCharacter::SwitchToFreeForAll()
+{
+	if (UWorld* World = GetWorld())
+	{
+		if (UScoreWorldSubsystem* ScoreSub = World->GetSubsystem<UScoreWorldSubsystem>())
+		{
+			ScoreSub->SetMatchMode(EBallMatchMode::FreeForAll);
+		}
 	}
 }
 
@@ -352,4 +388,3 @@ FString APlayerCharacter::GetPlayerTeam()
 {
 	return TeamName;
 }
-
