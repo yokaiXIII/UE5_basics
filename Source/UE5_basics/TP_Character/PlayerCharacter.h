@@ -3,18 +3,20 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "HitComponent.h"
 #include "InputAction.h"
 #include "Camera/CameraComponent.h"
 #include "Components/TimelineComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "UE5_basics/Public/HitComponent.h"
 #include "PlayerCharacter.generated.h"
 
+struct FTeam;
 class UInputMappingContext;
 class UInputAction;
 class UEnhancedInputComponent;
 class UHealthComponent;
+class ABall;
 
 UCLASS()
 class UE5_BASICS_API APlayerCharacter : public ACharacter
@@ -22,6 +24,7 @@ class UE5_BASICS_API APlayerCharacter : public ACharacter
 	GENERATED_BODY()
 
 public:
+	
 	// Sets default values for this character's properties
 	APlayerCharacter();
 
@@ -43,7 +46,7 @@ public:
 	int StaminaDamage;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	FString SocketName = "RightHandSocket";
+	FString SocketName = "hand_rSocket";
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UHealthComponent* HealthComponent;
@@ -51,6 +54,10 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UHitComponent* HitComponent;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	ABall* BallRetrived;
+	
 	
 protected:
 	// Called when the game starts or when spawned
@@ -91,10 +98,20 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category="Input")
 	UInputAction* ShootAction;
+	
+	
+	// Stun
+	bool IsStun = false;
+	void HandleHealthToZero();
+	void ToggleCommands(bool status);
+	void HandleHealthRecovery();
+	void ReturnedFullHealth();
 
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	void OnComponentHit(UPrimitiveComponent* Component, AActor* OtherActor, UPrimitiveComponent* OtherComp,
+						FVector NormalImpulse, const FHitResult& Hit);
 
 	void AimIn();
 	void AimOut();
@@ -105,6 +122,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void HandleHit(AActor* hitter);
+
+	UFUNCTION(BlueprintCallable)
+	void PickupBall(ABall* Ball);
 	
 	/** Handles move inputs from either controls or UI interfaces */
 	UFUNCTION(BlueprintCallable, Category="Input")
@@ -121,6 +141,10 @@ public:
 	/** Handles jump pressed inputs from either controls or UI interfaces */
 	UFUNCTION(BlueprintCallable, Category="Input")
 	virtual void DoJumpEnd();
+	
+	UFUNCTION(BlueprintCallable, Category="Teams")
+	void SetPlayerTeam(FTeam TeamName);
+	FString GetPlayerTeam();
 
 private:
 	UFUNCTION()
@@ -130,5 +154,8 @@ private:
 	void HandleProgressCameraOffset(FVector Offset);
 
 	UFUNCTION()
-	void FireFromWeapon();
+	void Throw();
+	
+	UPROPERTY(VisibleAnywhere)
+	FString TeamName;
 };

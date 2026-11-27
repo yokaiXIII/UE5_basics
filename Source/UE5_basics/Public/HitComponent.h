@@ -19,9 +19,6 @@ class UE5_BASICS_API UHitComponent : public UActorComponent
 public:	
 	// Sets default values for this component's properties
 	UHitComponent();
-
-	UPROPERTY(EditAnywhere , BlueprintReadWrite)
-	UBoxComponent* Collider;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FOnHitDelegate OnHit;
