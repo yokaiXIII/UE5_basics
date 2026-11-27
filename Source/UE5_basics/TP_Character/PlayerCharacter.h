@@ -98,18 +98,29 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category="Input")
 	UInputAction* ShootAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	UInputAction* AttackAction;
 	
 	
 	// Stun
 	bool IsStun = false;
+	
+	UFUNCTION()
 	void HandleHealthToZero();
+	
 	void ToggleCommands(bool status);
+
+	UFUNCTION()
 	void HandleHealthRecovery();
+	
 	void ReturnedFullHealth();
 
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	UFUNCTION()
 	void OnComponentHit(UPrimitiveComponent* Component, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 						FVector NormalImpulse, const FHitResult& Hit);
 
@@ -158,6 +169,9 @@ private:
 
 	UFUNCTION()
 	void Throw();
+
+	UFUNCTION()
+	void Attack();
 	
 	UPROPERTY(VisibleAnywhere)
 	FString TeamName;
