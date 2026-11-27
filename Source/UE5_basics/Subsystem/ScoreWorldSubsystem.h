@@ -23,6 +23,14 @@ enum class ETeam : uint8
 	MAX      UMETA(Hidden)   // optional sentinel, hidden in the editor
 };
 */
+
+UENUM(BlueprintType)
+enum class EBallMatchMode : uint8
+{
+	OneVsOne UMETA(DisplayName = "1 vs 1"),
+	FreeForAll UMETA(DisplayName = "Tutti contro tutti (Team 1-4)")
+};
+
 USTRUCT(BlueprintType)
 struct FTeam
 {
@@ -45,7 +53,7 @@ class UE5_BASICS_API UScoreWorldSubsystem : public UWorldSubsystem
 	
 public:
 	
-	virtual void Initialize(FSubsystemCollectionBase& Collection);
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 	
 	UFUNCTION(BlueprintCallable, Category="Score System")
@@ -57,8 +65,17 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Score System")
 	void RegisterNewPlayer(APlayerCharacter* Player);
 	
+	UFUNCTION(BlueprintCallable, Category = "Score System")
+	void SetMatchMode(EBallMatchMode NewMode);
+
+	UFUNCTION(BlueprintPure, Category = "Score System")
+	EBallMatchMode GetMatchMode() const { return CurrentMode; }
+	
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category="Score System")
 	FOnScoreChanged OnScoreChanged;
+	
+	UPROPERTY(BlueprintReadOnly, Category = "Score System")
+	EBallMatchMode CurrentMode = EBallMatchMode::OneVsOne;
 	
 	UPROPERTY(BlueprintReadOnly, Category="Score System")
 	TArray<FTeam> Teams;
@@ -69,6 +86,7 @@ public:
     //	TMap<ETeam, int32> scoreMap;
     	
 private:
+	void SetupDefaultTeams();
 	
 	UPROPERTY()
 	int currentScore = 0; 
